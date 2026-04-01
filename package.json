@@ -1,0 +1,25 @@
+{
+  "name": "pos-fe",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev --port 3002",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "start": "node .output/server/index.mjs"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "nuxt": "^3.8.0"
+  },
+  "dependencies": {
+    "axios": "^1.5.1",
+    "bootstrap": "^5.3.0",
+    "bootstrap-icons": "^1.10.5",
+    "bootstrap-vue-next": "^0.10.11",
+    "@pinia/nuxt": "^0.4.11",
+    "pinia": "^2.1.4",
+    "@kyvg/vue3-notification": "^3.1.3"
+  }
+}
