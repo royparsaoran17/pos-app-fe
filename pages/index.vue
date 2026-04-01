@@ -34,7 +34,9 @@
               <span v-if="maxToppings" class="text-muted fz-12">
                 (maks {{ maxToppings }}, dipilih: {{ currentItem.topping_ids.length }})
               </span>
-              <span v-else class="text-muted fz-12">(tanpa batas)</span>
+              <span v-else class="text-muted fz-12">
+                (tanpa batas{{ currentTotalGram ? ', total ' + currentTotalGram + 'g' : '' }})
+              </span>
             </label>
             <div class="mt-2">
               <span
@@ -49,15 +51,20 @@
               >
                 <i v-if="currentItem.topping_ids.includes(topping.id)" class="bi bi-check-circle-fill me-1"></i>
                 {{ topping.name }}
-                <span v-if="currentItem.topping_ids.includes(topping.id) && topping.gram_per_portion" class="fz-11 ms-1 opacity-75">
+                <span v-if="currentItem.topping_ids.includes(topping.id) && calcToppingGram(topping) > 0" class="fz-11 ms-1 opacity-75">
                   ({{ calcToppingGram(topping) }}g)
                 </span>
               </span>
             </div>
-            <!-- Gram info box -->
+            <!-- Gram info box - limited sizes -->
             <div v-if="currentItem.topping_ids.length > 0 && maxToppings && portionMultiplier > 1" class="alert alert-info fz-12 py-2 mt-2 mb-0">
               <i class="bi bi-info-circle me-1"></i>
               {{ currentItem.topping_ids.length }} topping dipilih dari maks {{ maxToppings }} porsi &rarr; setiap topping dapat <strong>{{ portionMultiplier }}x</strong> porsi
+            </div>
+            <!-- Gram info box - unlimited sizes with total gram -->
+            <div v-if="currentItem.topping_ids.length > 0 && !maxToppings && currentTotalGram" class="alert alert-info fz-12 py-2 mt-2 mb-0">
+              <i class="bi bi-info-circle me-1"></i>
+              Total {{ currentTotalGram }}g &divide; {{ currentItem.topping_ids.length }} topping = <strong>{{ Math.round(currentTotalGram / currentItem.topping_ids.length) }}g</strong> per topping
             </div>
           </div>
 
@@ -107,6 +114,13 @@
         <div class="order-card">
           <div class="card-title">
             <i class="bi bi-cart3 me-2"></i>Ringkasan Pesanan ({{ orderItems.length }} item)
+          </div>
+
+          <!-- Customer Name -->
+          <div class="mb-3">
+            <label class="fw-600 fz-14 mb-1">Nama Customer <span class="text-danger">*</span></label>
+            <input v-model="customerName" class="form-control fz-13" placeholder="Masukkan nama customer" />
+            <div class="fz-12 text-muted mt-1">Nama ini akan dipanggil saat pesanan siap</div>
           </div>
 
           <div v-if="orderItems.length === 0" class="text-center text-muted py-4">
@@ -202,7 +216,7 @@
 
               <button
                 class="btn btn-success w-100 py-2 fw-600"
-                :disabled="!paymentMethod || submitting"
+                :disabled="!paymentMethod || !customerName.trim() || submitting"
                 @click="submitOrder"
               >
                 <span v-if="submitting" class="spinner-border spinner-border-sm me-2"></span>
@@ -269,6 +283,7 @@ const defaultItem = () => ({ size: null, topping_ids: [], bumbu: [], spicy_level
 
 const currentItem = ref(defaultItem())
 const orderItems = ref([])
+const customerName = ref('')
 const paymentMethod = ref(null)
 const notes = ref('')
 const submitting = ref(false)
@@ -296,6 +311,11 @@ const sizeMap = computed(() => {
 const maxToppings = computed(() => {
   if (!currentItem.value.size) return null
   return sizeMap.value[currentItem.value.size]?.max_toppings ?? null
+})
+
+const currentTotalGram = computed(() => {
+  if (!currentItem.value.size) return null
+  return sizeMap.value[currentItem.value.size]?.total_topping_gram ?? null
 })
 
 const isToppingLimitReached = computed(() => {
@@ -373,19 +393,39 @@ const portionMultiplier = computed(() => {
   return Math.floor(max / selected)
 })
 
-// Calculate gram for a single topping based on portion multiplier
+// Calculate gram for a single topping in the current item form
 const calcToppingGram = (topping) => {
+  const selected = currentItem.value.topping_ids.length
+  if (!selected) return 0
+
+  // Unlimited sizes (Large/Thinwall): total_topping_gram / number of toppings
+  const totalGram = currentTotalGram.value
+  if (!maxToppings.value && totalGram) {
+    return Math.round(totalGram / selected)
+  }
+
+  // Limited sizes (Small/Medium): gram_per_portion * multiplier
   if (!topping.gram_per_portion) return 0
   return Math.round(topping.gram_per_portion * portionMultiplier.value * 10) / 10
 }
 
-// Calculate gram for a topping in a saved order item
+// Calculate gram for a topping in a saved order item (order summary)
 const calcItemToppingGram = (item, toppingId) => {
+  const selected = item.topping_ids.length
+  if (!selected) return 0
+
+  const sizeData = sizeMap.value[item.size]
+
+  // Unlimited sizes: total_topping_gram / number of toppings
+  if (!sizeData?.max_toppings && sizeData?.total_topping_gram) {
+    return Math.round(sizeData.total_topping_gram / selected)
+  }
+
+  // Limited sizes: gram_per_portion * multiplier
   const topping = toppings.value.find(t => t.id === toppingId)
   if (!topping?.gram_per_portion) return 0
-  const max = sizeMap.value[item.size]?.max_toppings
-  const selected = item.topping_ids.length
-  if (!max || !selected) return topping.gram_per_portion
+  const max = sizeData?.max_toppings
+  if (!max) return topping.gram_per_portion
   const multiplier = Math.floor(max / selected)
   return Math.round(topping.gram_per_portion * multiplier * 10) / 10
 }
@@ -445,6 +485,7 @@ const submitOrder = async () => {
   try {
     const payload = {
       items: orderItems.value,
+      customer_name: customerName.value.trim(),
       payment_method: paymentMethod.value,
       notes: notes.value || undefined,
       member_phone: memberPhone.value || undefined,
@@ -461,6 +502,7 @@ const submitOrder = async () => {
 
     // Reset form
     orderItems.value = []
+    customerName.value = ''
     paymentMethod.value = null
     notes.value = ''
     currentItem.value = defaultItem()

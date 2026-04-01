@@ -260,13 +260,14 @@ const toggleMinimize = () => {
   color: var(--gray-500);
   cursor: pointer;
   margin: 12px auto 4px;
-  transition: all 0.15s;
+  transition: all 0.2s ease;
   font-size: 18px;
 }
 .sidebar-toggle:hover {
-  background: var(--primary-bg);
+  background: linear-gradient(135deg, var(--primary-bg), var(--primary-bg-hover));
   color: var(--primary);
   border-color: var(--primary-light);
+  transform: scale(1.05);
 }
 
 /* Minimized state */

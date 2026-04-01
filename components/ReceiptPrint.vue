@@ -1,10 +1,13 @@
 <template>
   <div class="receipt-print-area">
     <div class="receipt">
+      <!-- Header with store info -->
       <div class="receipt-header">
         <img src="/logo.png" alt="OMT" style="width:48px;height:48px;object-fit:contain;margin-bottom:4px" />
-        <div style="font-size: 16px; font-weight: bold">Oh My Tongue</div>
-        <div style="font-size: 11px">Struk Pembelian</div>
+        <div style="font-size: 16px; font-weight: bold">{{ order?.store?.name || 'Oh My Tongue' }}</div>
+        <div v-if="order?.store?.address" style="font-size: 10px; margin-top: 2px; line-height: 1.4">{{ order.store.address }}</div>
+        <div v-if="order?.store?.phone" style="font-size: 10px">Tel: {{ order.store.phone }}</div>
+        <div style="font-size: 11px; margin-top: 4px">Struk Pembelian</div>
         <div style="font-size: 10px; margin-top: 4px">{{ formatDate(order?.created_at) }}</div>
       </div>
 
@@ -12,6 +15,12 @@
       <div v-if="order?.queue_number" style="text-align:center; margin: 8px 0; border: 2px solid #000; padding: 6px; border-radius: 4px">
         <div style="font-size: 11px; font-weight: bold">NOMOR ANTRIAN</div>
         <div style="font-size: 32px; font-weight: bold; line-height: 1.2">{{ order.queue_number }}</div>
+      </div>
+
+      <!-- Customer Name -->
+      <div v-if="order?.customer_name" style="text-align:center; margin: 6px 0; padding: 4px; border: 1px dashed #000; border-radius: 4px">
+        <div style="font-size: 10px">NAMA CUSTOMER</div>
+        <div style="font-size: 14px; font-weight: bold">{{ order.customer_name }}</div>
       </div>
 
       <div class="receipt-row">
@@ -65,9 +74,20 @@
 
       <div class="receipt-divider"></div>
 
-      <div style="text-align: center; font-size: 10px; margin-top: 8px">
+      <!-- Footer with social media CTA -->
+      <div style="text-align: center; font-size: 10px; margin-top: 8px; line-height: 1.6">
         <div>Terima kasih atas pembelian Anda!</div>
-        <div style="margin-top: 4px">--- Oh My Tongue ---</div>
+        <div v-if="order?.store?.instagram || order?.store?.tiktok" style="margin-top: 6px; border-top: 1px dashed #000; padding-top: 6px">
+          <div style="font-weight: bold; font-size: 11px">Follow kami yuk!</div>
+          <div v-if="order?.store?.instagram" style="margin-top: 2px">
+            IG: @{{ order.store.instagram }}
+          </div>
+          <div v-if="order?.store?.tiktok" style="margin-top: 2px">
+            TikTok: @{{ order.store.tiktok }}
+          </div>
+          <div style="margin-top: 4px; font-size: 9px; font-style: italic">Tag kami & dapatkan kesempatan repost!</div>
+        </div>
+        <div style="margin-top: 6px">--- Oh My Tongue ---</div>
       </div>
     </div>
   </div>

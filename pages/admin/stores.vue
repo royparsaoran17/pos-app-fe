@@ -16,6 +16,7 @@
               <th>Nama Toko</th>
               <th>Alamat</th>
               <th>Telepon</th>
+              <th>Sosial Media</th>
               <th>Staff</th>
               <th>Orders</th>
               <th>Status</th>
@@ -24,18 +25,23 @@
           </thead>
           <tbody>
             <tr v-if="loading">
-              <td colspan="8" class="text-center py-4">
+              <td colspan="9" class="text-center py-4">
                 <span class="spinner-border spinner-border-sm me-2"></span> Memuat...
               </td>
             </tr>
             <tr v-else-if="!rows.length">
-              <td colspan="8" class="text-center py-4 text-muted">Belum ada toko</td>
+              <td colspan="9" class="text-center py-4 text-muted">Belum ada toko</td>
             </tr>
             <tr v-for="row in rows" :key="row.id">
               <td><span class="badge bg-secondary">{{ row.code }}</span></td>
               <td class="fw-500">{{ row.name }}</td>
               <td class="fz-13 text-muted">{{ row.address || '-' }}</td>
               <td class="fz-13">{{ row.phone || '-' }}</td>
+              <td class="fz-12">
+                <div v-if="row.instagram"><i class="bi bi-instagram me-1"></i>@{{ row.instagram }}</div>
+                <div v-if="row.tiktok"><i class="bi bi-tiktok me-1"></i>@{{ row.tiktok }}</div>
+                <span v-if="!row.instagram && !row.tiktok" class="text-muted">-</span>
+              </td>
               <td>{{ row._count?.users || 0 }}</td>
               <td>{{ row._count?.orders || 0 }}</td>
               <td>
@@ -83,6 +89,22 @@
               <div class="mb-3">
                 <label class="form-label fw-500 fz-14">Telepon</label>
                 <input v-model="form.phone" class="form-control" placeholder="08123456789" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-500 fz-14">Instagram</label>
+                <div class="input-group">
+                  <span class="input-group-text fz-13">@</span>
+                  <input v-model="form.instagram" class="form-control" placeholder="ohmytongue.id" />
+                </div>
+                <small class="text-muted">Username tanpa @, akan tampil di struk</small>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-500 fz-14">TikTok</label>
+                <div class="input-group">
+                  <span class="input-group-text fz-13">@</span>
+                  <input v-model="form.tiktok" class="form-control" placeholder="ohmytongue" />
+                </div>
+                <small class="text-muted">Username tanpa @, akan tampil di struk</small>
               </div>
               <div v-if="form.id" class="form-check">
                 <input v-model="form.is_active" type="checkbox" class="form-check-input" id="storeActive" />
@@ -135,7 +157,7 @@ const toast = useToast()
 const loading = ref(false)
 const saving = ref(false)
 const rows = ref([])
-const form = ref({ id: null, name: '', code: '', address: '', phone: '', is_active: true })
+const form = ref({ id: null, name: '', code: '', address: '', phone: '', instagram: '', tiktok: '', is_active: true })
 const deleteTarget = ref(null)
 const formModalEl = ref(null)
 const deleteModalEl = ref(null)
@@ -157,9 +179,9 @@ const loadData = async () => {
 
 const openForm = (row) => {
   if (row) {
-    form.value = { id: row.id, name: row.name, code: row.code, address: row.address || '', phone: row.phone || '', is_active: row.is_active }
+    form.value = { id: row.id, name: row.name, code: row.code, address: row.address || '', phone: row.phone || '', instagram: row.instagram || '', tiktok: row.tiktok || '', is_active: row.is_active }
   } else {
-    form.value = { id: null, name: '', code: '', address: '', phone: '', is_active: true }
+    form.value = { id: null, name: '', code: '', address: '', phone: '', instagram: '', tiktok: '', is_active: true }
   }
   formModal.show()
 }

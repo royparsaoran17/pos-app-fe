@@ -12,6 +12,12 @@
         <div style="font-size: 36px; font-weight: bold; line-height: 1.2">{{ order.queue_number }}</div>
       </div>
 
+      <!-- Customer Name - prominent for staff to call -->
+      <div v-if="order?.customer_name" style="text-align:center; margin: 6px 0; padding: 6px; border: 2px solid #000; border-radius: 4px; background: #000; color: #fff">
+        <div style="font-size: 10px; font-weight: bold; letter-spacing: 1px">CUSTOMER</div>
+        <div style="font-size: 18px; font-weight: bold; letter-spacing: 0.5px">{{ order.customer_name }}</div>
+      </div>
+
       <div class="receipt-row">
         <span>No. Order</span>
         <span>{{ order?.order_number }}</span>
@@ -38,9 +44,13 @@
             </span>
           </div>
 
-          <!-- Multiplier info -->
-          <div v-if="getMultiplier(item) > 1" style="font-size: 10px; padding-left: 8px; font-style: italic; margin-top: 2px">
+          <!-- Multiplier info - limited sizes -->
+          <div v-if="getMaxToppings(item) && getMultiplier(item) > 1" style="font-size: 10px; padding-left: 8px; font-style: italic; margin-top: 2px">
             * porsi x{{ getMultiplier(item) }} ({{ item.toppings?.length }} dari {{ getMaxToppings(item) }} topping)
+          </div>
+          <!-- Gram info - unlimited sizes -->
+          <div v-if="!getMaxToppings(item) && getSizeData(item)?.total_topping_gram" style="font-size: 10px; padding-left: 8px; font-style: italic; margin-top: 2px">
+            * {{ getSizeData(item).total_topping_gram }}g &divide; {{ item.toppings?.length }} topping
           </div>
 
           <div style="margin-top: 4px"><span style="font-weight: bold; font-size: 12px">Bumbu:</span> {{ item.bumbu }}</div>
@@ -52,6 +62,11 @@
 
       <div v-if="order?.notes" style="font-size: 11px; margin-bottom: 4px">
         <strong>Catatan:</strong> {{ order.notes }}
+      </div>
+
+      <!-- Repeat customer name at bottom for easy reference -->
+      <div v-if="order?.customer_name" style="text-align: center; margin-top: 8px; padding: 4px; border: 1px dashed #000; font-size: 12px">
+        <strong>Panggil: {{ order.customer_name }}</strong>
       </div>
 
       <div style="text-align: center; font-size: 10px; margin-top: 8px">
@@ -74,9 +89,12 @@ const getSizeLabel = (key) => {
   return found?.label || key
 }
 
+const getSizeData = (item) => {
+  return props.sizes?.find(s => s.key === item.menu_size_key)
+}
+
 const getMaxToppings = (item) => {
-  const sizeInfo = props.sizes?.find(s => s.key === item.menu_size_key)
-  return sizeInfo?.max_toppings || 0
+  return getSizeData(item)?.max_toppings || 0
 }
 
 const getMultiplier = (item) => {
@@ -86,6 +104,15 @@ const getMultiplier = (item) => {
 }
 
 const calcGram = (item, toppingEntry) => {
+  const selectedCount = item.toppings?.length || 1
+  const sizeData = getSizeData(item)
+
+  // Unlimited sizes (Large/Thinwall): total_topping_gram / number of toppings
+  if (!sizeData?.max_toppings && sizeData?.total_topping_gram) {
+    return Math.round(sizeData.total_topping_gram / selectedCount)
+  }
+
+  // Limited sizes (Small/Medium): gram_per_portion * multiplier
   const gram = toppingEntry.topping?.gram_per_portion
   if (!gram) return 0
   const multiplier = getMultiplier(item)

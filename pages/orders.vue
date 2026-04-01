@@ -41,6 +41,7 @@
             <th>No</th>
             <th>Antrian</th>
             <th>No. Order</th>
+            <th>Customer</th>
             <th>Kasir</th>
             <th>Member</th>
             <th>Item</th>
@@ -53,15 +54,16 @@
         </thead>
         <tbody>
           <tr v-if="loading">
-            <td colspan="11" class="text-center py-4 text-muted">Memuat data...</td>
+            <td colspan="12" class="text-center py-4 text-muted">Memuat data...</td>
           </tr>
           <tr v-else-if="orders.length === 0">
-            <td colspan="11" class="text-center py-4 text-muted">Tidak ada data pesanan</td>
+            <td colspan="12" class="text-center py-4 text-muted">Tidak ada data pesanan</td>
           </tr>
           <tr v-for="(order, idx) in orders" :key="order.id">
             <td>{{ (currentPage - 1) * perPage + idx + 1 }}</td>
             <td class="text-center"><span class="badge bg-primary fw-bold">{{ order.queue_number || '-' }}</span></td>
             <td class="fw-600 fz-13">{{ order.order_number }}</td>
+            <td class="fw-600">{{ order.customer_name || '-' }}</td>
             <td>{{ order.staff?.name }}</td>
             <td class="fz-13">
               <span v-if="order.member">{{ order.member.name || order.member.phone }}</span>
@@ -130,6 +132,7 @@
           </div>
           <div class="modal-body">
             <div class="mb-2"><strong>No. Order:</strong> {{ selectedOrder.order_number }}</div>
+            <div v-if="selectedOrder.customer_name" class="mb-2"><strong>Customer:</strong> {{ selectedOrder.customer_name }}</div>
             <div class="mb-2"><strong>Kasir:</strong> {{ selectedOrder.staff?.name }}</div>
             <div v-if="selectedOrder.member" class="mb-2"><strong>Member:</strong> {{ selectedOrder.member.name || selectedOrder.member.phone }}</div>
             <div class="mb-2"><strong>Pembayaran:</strong> {{ selectedOrder.payment_method }}</div>
