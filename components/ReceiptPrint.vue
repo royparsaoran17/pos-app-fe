@@ -47,7 +47,7 @@
           <span>{{ idx + 1 }}. {{ getSizeLabel(item.menu_size_key) }}</span>
           <span>{{ formatRupiah(item.price) }}</span>
         </div>
-        <div style="font-size: 10px; padding-left: 16px; line-height: 1.5">
+        <div v-if="isFood(item)" style="font-size: 10px; padding-left: 16px; line-height: 1.5">
           <div>Topping: {{ getToppingNames(item) }}</div>
           <div>Bumbu: {{ item.bumbu }}</div>
           <div>Pedas: {{ item.spicy_level }}</div>
@@ -110,5 +110,10 @@ const getSizeLabel = (key) => {
 const getToppingNames = (item) => {
   if (!item.toppings || item.toppings.length === 0) return '-'
   return item.toppings.map((t) => t.topping?.name || '-').join(', ')
+}
+
+const isFood = (item) => {
+  const size = props.sizes?.find(s => s.key === item.menu_size_key)
+  return size?.category !== 'DRINK'
 }
 </script>

@@ -31,9 +31,9 @@
 
       <div v-for="(item, idx) in order?.order_items" :key="idx" style="margin-bottom: 12px">
         <div style="font-weight: bold; font-size: 14px; margin-bottom: 4px; border-bottom: 1px solid #000; padding-bottom: 2px">
-          {{ idx + 1 }}. {{ getSizeLabel(item.menu_size_key) }}
+          {{ idx + 1 }}. {{ getSizeLabel(item.menu_size_key) }}{{ isFood(item) ? '' : ' (Minuman)' }}
         </div>
-        <div style="padding-left: 4px; line-height: 1.6">
+        <div v-if="isFood(item)" style="padding-left: 4px; line-height: 1.6">
           <!-- Topping with gram -->
           <div style="font-weight: bold; font-size: 12px; margin-top: 4px">Topping:</div>
           <div v-if="!item.toppings || item.toppings.length === 0" style="padding-left: 8px; font-size: 12px">-</div>
@@ -91,6 +91,10 @@ const getSizeLabel = (key) => {
 
 const getSizeData = (item) => {
   return props.sizes?.find(s => s.key === item.menu_size_key)
+}
+
+const isFood = (item) => {
+  return getSizeData(item)?.category !== 'DRINK'
 }
 
 const getMaxToppings = (item) => {

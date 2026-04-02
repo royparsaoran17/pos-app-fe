@@ -1,18 +1,19 @@
 <template>
   <AdminCrud
     title="Menu / Ukuran"
-    :column-count="9"
+    :column-count="10"
     :fetch-fn="store.adminFetchMenuSizes"
     :create-fn="store.adminCreateMenuSize"
     :update-fn="store.adminUpdateMenuSize"
     :delete-fn="store.adminDeleteMenuSize"
-    :default-form-data="() => ({ key: '', label: '', price: 0, hpp: 0, max_toppings: null, total_topping_gram: null, sort_order: 0 })"
-    :map-row-to-form="(r) => ({ key: r.key, label: r.label, price: r.price, hpp: r.hpp || 0, max_toppings: r.max_toppings, total_topping_gram: r.total_topping_gram, sort_order: r.sort_order })"
+    :default-form-data="() => ({ key: '', label: '', category: 'FOOD', price: 0, hpp: 0, max_toppings: null, total_topping_gram: null, sort_order: 0 })"
+    :map-row-to-form="(r) => ({ key: r.key, label: r.label, category: r.category || 'FOOD', price: r.price, hpp: r.hpp || 0, max_toppings: r.max_toppings, total_topping_gram: r.total_topping_gram, sort_order: r.sort_order })"
     :map-form-to-payload="mapPayload"
   >
     <template #table-head>
       <th>Key</th>
       <th>Label</th>
+      <th>Kategori</th>
       <th>Harga</th>
       <th>HPP</th>
       <th>Margin</th>
@@ -22,6 +23,11 @@
     <template #table-row="{ row }">
       <td><code>{{ row.key }}</code></td>
       <td class="fw-600">{{ row.label }}</td>
+      <td>
+        <span :class="row.category === 'DRINK' ? 'badge bg-info' : 'badge bg-warning'">
+          {{ row.category === 'DRINK' ? 'Minuman' : 'Makanan' }}
+        </span>
+      </td>
       <td class="text-primary fw-600">{{ formatRupiah(row.price) }}</td>
       <td class="text-danger fw-600">{{ formatRupiah(row.hpp || 0) }}</td>
       <td>
@@ -44,6 +50,14 @@
         <label class="form-label fw-600 fz-14">Label</label>
         <input v-model="form.label" class="form-control" placeholder="cth: Jumbo" />
       </div>
+      <div class="mb-3">
+        <label class="form-label fw-600 fz-14">Kategori</label>
+        <select v-model="form.category" class="form-select">
+          <option value="FOOD">Makanan (Cemilan)</option>
+          <option value="DRINK">Minuman</option>
+        </select>
+        <div class="fz-12 text-muted mt-1">Minuman tidak memerlukan topping, bumbu, atau level pedas</div>
+      </div>
       <div class="row g-2 mb-3">
         <div class="col-6">
           <label class="form-label fw-600 fz-14">Harga Jual (Rp)</label>
@@ -59,7 +73,7 @@
         Margin: <strong>{{ formatRupiah(form.price - form.hpp) }}</strong>
         ({{ Math.round(((form.price - form.hpp) / form.price) * 100) }}%)
       </div>
-      <div class="row g-2 mb-3">
+      <div v-if="form.category !== 'DRINK'" class="row g-2 mb-3">
         <div class="col-6">
           <label class="form-label fw-600 fz-14">Maks Topping</label>
           <input v-model.number="form.max_toppings" type="number" class="form-control" placeholder="Kosongkan untuk tanpa batas" />
@@ -86,9 +100,14 @@ definePageMeta({ layout: 'dashboard', middleware: 'auth' })
 const store = useMainStore()
 
 const mapPayload = (f) => {
-  const payload = { label: f.label, price: f.price, hpp: f.hpp || 0, sort_order: f.sort_order }
-  payload.max_toppings = f.max_toppings || null
-  payload.total_topping_gram = f.total_topping_gram || null
+  const payload = { label: f.label, category: f.category || 'FOOD', price: f.price, hpp: f.hpp || 0, sort_order: f.sort_order }
+  if (f.category === 'DRINK') {
+    payload.max_toppings = null
+    payload.total_topping_gram = null
+  } else {
+    payload.max_toppings = f.max_toppings || null
+    payload.total_topping_gram = f.total_topping_gram || null
+  }
   if (f.key) payload.key = f.key
   return payload
 }

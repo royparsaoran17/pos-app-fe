@@ -20,85 +20,98 @@
                   :class="{ selected: currentItem.size === size.key }"
                   @click="selectSize(size.key)"
                 >
-                  <div class="size-name">{{ size.label }}</div>
+                  <div class="size-name">
+                    <i :class="size.category === 'DRINK' ? 'bi bi-cup-straw' : 'bi bi-egg-fried'" class="me-1 fz-12"></i>
+                    {{ size.label }}
+                  </div>
                   <div class="size-price">{{ formatRupiah(size.price) }}</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- TOPPING SELECTION -->
-          <div class="mb-4">
-            <label class="fw-600 fz-14 mb-1 d-block">
-              Pilih Topping
-              <span v-if="maxToppings" class="text-muted fz-12">
-                (maks {{ maxToppings }}, dipilih: {{ currentItem.topping_ids.length }})
-              </span>
-              <span v-else class="text-muted fz-12">
-                (tanpa batas{{ currentTotalGram ? ', total ' + currentTotalGram + 'g' : '' }})
-              </span>
-            </label>
-            <div class="mt-2">
-              <span
-                v-for="topping in toppings"
-                :key="topping.id"
-                class="topping-chip"
-                :class="{
-                  selected: currentItem.topping_ids.includes(topping.id),
-                  disabled: !currentItem.topping_ids.includes(topping.id) && isToppingLimitReached,
-                }"
-                @click="toggleTopping(topping.id)"
-              >
-                <i v-if="currentItem.topping_ids.includes(topping.id)" class="bi bi-check-circle-fill me-1"></i>
-                {{ topping.name }}
-                <span v-if="currentItem.topping_ids.includes(topping.id) && calcToppingGram(topping) > 0" class="fz-11 ms-1 opacity-75">
-                  ({{ calcToppingGram(topping) }}g)
+          <!-- FOOD-ONLY sections: Topping, Bumbu, Spicy -->
+          <template v-if="isCurrentSizeFood">
+            <!-- TOPPING SELECTION -->
+            <div class="mb-4">
+              <label class="fw-600 fz-14 mb-1 d-block">
+                Pilih Topping
+                <span v-if="maxToppings" class="text-muted fz-12">
+                  (maks {{ maxToppings }}, dipilih: {{ currentItem.topping_ids.length }})
                 </span>
-              </span>
+                <span v-else class="text-muted fz-12">
+                  (tanpa batas{{ currentTotalGram ? ', total ' + currentTotalGram + 'g' : '' }})
+                </span>
+              </label>
+              <div class="mt-2">
+                <span
+                  v-for="topping in toppings"
+                  :key="topping.id"
+                  class="topping-chip"
+                  :class="{
+                    selected: currentItem.topping_ids.includes(topping.id),
+                    disabled: !currentItem.topping_ids.includes(topping.id) && isToppingLimitReached,
+                  }"
+                  @click="toggleTopping(topping.id)"
+                >
+                  <i v-if="currentItem.topping_ids.includes(topping.id)" class="bi bi-check-circle-fill me-1"></i>
+                  {{ topping.name }}
+                  <span v-if="currentItem.topping_ids.includes(topping.id) && calcToppingGram(topping) > 0" class="fz-11 ms-1 opacity-75">
+                    ({{ calcToppingGram(topping) }}g)
+                  </span>
+                </span>
+              </div>
+              <!-- Gram info box - limited sizes -->
+              <div v-if="currentItem.topping_ids.length > 0 && maxToppings && portionMultiplier > 1" class="alert alert-info fz-12 py-2 mt-2 mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                {{ currentItem.topping_ids.length }} topping dipilih dari maks {{ maxToppings }} porsi &rarr; setiap topping dapat <strong>{{ portionMultiplier }}x</strong> porsi
+              </div>
+              <!-- Gram info box - unlimited sizes with total gram -->
+              <div v-if="currentItem.topping_ids.length > 0 && !maxToppings && currentTotalGram" class="alert alert-info fz-12 py-2 mt-2 mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                Total {{ currentTotalGram }}g &divide; {{ currentItem.topping_ids.length }} topping = <strong>{{ Math.round(currentTotalGram / currentItem.topping_ids.length) }}g</strong> per topping
+              </div>
             </div>
-            <!-- Gram info box - limited sizes -->
-            <div v-if="currentItem.topping_ids.length > 0 && maxToppings && portionMultiplier > 1" class="alert alert-info fz-12 py-2 mt-2 mb-0">
-              <i class="bi bi-info-circle me-1"></i>
-              {{ currentItem.topping_ids.length }} topping dipilih dari maks {{ maxToppings }} porsi &rarr; setiap topping dapat <strong>{{ portionMultiplier }}x</strong> porsi
-            </div>
-            <!-- Gram info box - unlimited sizes with total gram -->
-            <div v-if="currentItem.topping_ids.length > 0 && !maxToppings && currentTotalGram" class="alert alert-info fz-12 py-2 mt-2 mb-0">
-              <i class="bi bi-info-circle me-1"></i>
-              Total {{ currentTotalGram }}g &divide; {{ currentItem.topping_ids.length }} topping = <strong>{{ Math.round(currentTotalGram / currentItem.topping_ids.length) }}g</strong> per topping
-            </div>
-          </div>
 
-          <!-- BUMBU SELECTION (multi) -->
-          <div class="mb-4">
-            <label class="fw-600 fz-14 mb-2 d-block">
-              Pilih Bumbu <span class="text-muted fz-12">(min 1, dipilih: {{ currentItem.bumbu.length }})</span>
-            </label>
-            <div>
-              <span
-                v-for="b in bumbuList"
-                :key="b.id"
-                class="bumbu-option"
-                :class="{ selected: currentItem.bumbu.includes(b.name) }"
-                @click="toggleBumbu(b.name)"
-              >
-                <i v-if="currentItem.bumbu.includes(b.name)" class="bi bi-check-circle-fill me-1"></i>
-                {{ b.name }}
-              </span>
+            <!-- BUMBU SELECTION (multi) -->
+            <div class="mb-4">
+              <label class="fw-600 fz-14 mb-2 d-block">
+                Pilih Bumbu <span class="text-muted fz-12">(min 1, dipilih: {{ currentItem.bumbu.length }})</span>
+              </label>
+              <div>
+                <span
+                  v-for="b in bumbuList"
+                  :key="b.id"
+                  class="bumbu-option"
+                  :class="{ selected: currentItem.bumbu.includes(b.name) }"
+                  @click="toggleBumbu(b.name)"
+                >
+                  <i v-if="currentItem.bumbu.includes(b.name)" class="bi bi-check-circle-fill me-1"></i>
+                  {{ b.name }}
+                </span>
+              </div>
             </div>
-          </div>
 
-          <!-- SPICY LEVEL -->
-          <div class="mb-4">
-            <label class="fw-600 fz-14 mb-2 d-block">
-              Level Pedas: <span class="text-danger fw-700">{{ currentItem.spicy_level }}</span>
-              <span class="ms-2">
-                <span v-for="n in Math.floor(currentItem.spicy_level)" :key="n">🌶️</span>
-              </span>
-            </label>
-            <input v-model.number="currentItem.spicy_level" type="range" class="spicy-slider" min="0.5" max="5" step="0.5" />
-            <div class="d-flex justify-content-between fz-12 text-muted mt-1">
-              <span>0.5 (Ringan)</span>
-              <span>5 (Sangat Pedas)</span>
+            <!-- SPICY LEVEL -->
+            <div class="mb-4">
+              <label class="fw-600 fz-14 mb-2 d-block">
+                Level Pedas: <span class="text-danger fw-700">{{ currentItem.spicy_level }}</span>
+                <span class="ms-2">
+                  <span v-for="n in Math.floor(currentItem.spicy_level)" :key="n">🌶️</span>
+                </span>
+              </label>
+              <input v-model.number="currentItem.spicy_level" type="range" class="spicy-slider" min="0.5" max="5" step="0.5" />
+              <div class="d-flex justify-content-between fz-12 text-muted mt-1">
+                <span>0.5 (Ringan)</span>
+                <span>5 (Sangat Pedas)</span>
+              </div>
+            </div>
+          </template>
+
+          <!-- DRINK info -->
+          <div v-if="currentItem.size && !isCurrentSizeFood" class="mb-4">
+            <div class="alert alert-info fz-13 py-2 mb-0">
+              <i class="bi bi-cup-straw me-1"></i> Minuman — tidak perlu pilih topping, bumbu, atau level pedas.
             </div>
           </div>
 
@@ -133,9 +146,10 @@
             <div class="d-flex align-items-center gap-2 mb-2">
               <span class="item-number">{{ index + 1 }}</span>
               <span class="fw-600">{{ getSizeLabel(item.size) }}</span>
+              <span v-if="isItemDrink(item)" class="badge bg-info fz-11">Minuman</span>
               <span class="text-primary fw-600 fz-13">{{ formatRupiah(getSizePrice(item.size)) }}</span>
             </div>
-            <div class="fz-12 text-muted">
+            <div v-if="!isItemDrink(item)" class="fz-12 text-muted">
               <div><strong>Topping:</strong> {{ getToppingNamesWithGram(item) }}</div>
               <div><strong>Bumbu:</strong> {{ Array.isArray(item.bumbu) ? item.bumbu.join(', ') : item.bumbu }}</div>
               <div><strong>Level Pedas:</strong> {{ item.spicy_level }}</div>
@@ -318,13 +332,22 @@ const currentTotalGram = computed(() => {
   return sizeMap.value[currentItem.value.size]?.total_topping_gram ?? null
 })
 
+const isCurrentSizeFood = computed(() => {
+  if (!currentItem.value.size) return true
+  return sizeMap.value[currentItem.value.size]?.category !== 'DRINK'
+})
+
 const isToppingLimitReached = computed(() => {
   if (!maxToppings.value) return false
   return currentItem.value.topping_ids.length >= maxToppings.value
 })
 
 const isCurrentItemValid = computed(() => {
-  return currentItem.value.size && currentItem.value.bumbu.length > 0 && currentItem.value.spicy_level
+  if (!currentItem.value.size) return false
+  // Drinks only need a size selected
+  if (!isCurrentSizeFood.value) return true
+  // Food needs bumbu + spicy
+  return currentItem.value.bumbu.length > 0 && currentItem.value.spicy_level
 })
 
 const toggleBumbu = (name) => {
@@ -349,9 +372,19 @@ const totalPrice = computed(() => {
 
 const selectSize = (key) => {
   currentItem.value.size = key
-  const limit = sizeMap.value[key]?.max_toppings
-  if (limit && currentItem.value.topping_ids.length > limit) {
-    currentItem.value.topping_ids = currentItem.value.topping_ids.slice(0, limit)
+  const sizeData = sizeMap.value[key]
+  if (sizeData?.category === 'DRINK') {
+    // Clear food-specific fields for drinks
+    currentItem.value.topping_ids = []
+    currentItem.value.bumbu = []
+    currentItem.value.spicy_level = 0
+  } else {
+    // Restore default spicy if switching back to food
+    if (currentItem.value.spicy_level === 0) currentItem.value.spicy_level = 2
+    const limit = sizeData?.max_toppings
+    if (limit && currentItem.value.topping_ids.length > limit) {
+      currentItem.value.topping_ids = currentItem.value.topping_ids.slice(0, limit)
+    }
   }
 }
 
@@ -379,6 +412,7 @@ const removeItem = (index) => {
 
 const getSizeLabel = (key) => sizeMap.value[key]?.label || key
 const getSizePrice = (key) => sizeMap.value[key]?.price || 0
+const isItemDrink = (item) => sizeMap.value[item.size]?.category === 'DRINK'
 
 const getToppingNames = (ids) => {
   if (!ids || ids.length === 0) return '-'
