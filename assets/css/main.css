@@ -373,11 +373,11 @@ body {
   flex-shrink: 0;
 }
 
-/* Size buttons */
+/* Size buttons - LARGER */
 .size-btn {
   border: 2px solid var(--gray-200);
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 14px;
+  padding: 20px 16px;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -413,62 +413,133 @@ body {
 }
 
 .size-btn .size-name {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 4px;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
   position: relative;
   z-index: 1;
 }
 
 .size-btn .size-price {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--primary);
   font-weight: 600;
   position: relative;
   z-index: 1;
 }
 
-/* Topping chips */
-.topping-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 14px;
-  border: 1px solid var(--gray-200);
-  border-radius: 20px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin: 4px;
-  user-select: none;
+/* Topping grid with quantity controls */
+.topping-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
 }
 
-.topping-chip:hover {
+.topping-card {
+  border: 2px solid var(--gray-200);
+  border-radius: 14px;
+  background: white;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  user-select: none;
+  cursor: pointer;
+}
+
+.topping-card:hover {
   border-color: var(--primary);
   background-color: var(--primary-bg);
   transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
-.topping-chip.selected {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  border-color: transparent;
-  color: white;
-  box-shadow: 0 2px 8px rgba(228, 65, 46, 0.3);
+.topping-card.selected {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, var(--primary-bg-hover) 0%, var(--primary-bg) 100%);
+  box-shadow: 0 0 0 1px var(--primary), var(--shadow-primary);
 }
 
-.topping-chip.disabled {
-  opacity: 0.4;
+.topping-card.disabled {
+  opacity: 0.35;
+  pointer-events: none;
   cursor: not-allowed;
 }
 
-/* Bumbu radio */
+.topping-card-body {
+  padding: 14px 12px 8px;
+  text-align: center;
+}
+
+.topping-name {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.topping-card.selected .topping-name {
+  color: var(--primary-dark);
+}
+
+.topping-gram {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-top: 2px;
+}
+
+.topping-qty-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 8px 10px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.qty-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  background: white;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.qty-btn:hover:not(:disabled) {
+  background: var(--primary);
+  color: white;
+  transform: scale(1.1);
+}
+
+.qty-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.qty-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  min-width: 24px;
+  text-align: center;
+}
+
+/* Bumbu options - LARGER */
 .bumbu-option {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
-  border: 1px solid var(--gray-200);
-  border-radius: 20px;
-  font-size: 13px;
+  padding: 12px 18px;
+  border: 2px solid var(--gray-200);
+  border-radius: 24px;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   margin: 4px;
@@ -487,20 +558,20 @@ body {
   box-shadow: 0 2px 8px rgba(228, 65, 46, 0.3);
 }
 
-/* Spicy slider */
+/* Spicy slider - LARGER */
 .spicy-slider {
   width: 100%;
   appearance: none;
-  height: 8px;
-  border-radius: 4px;
+  height: 10px;
+  border-radius: 5px;
   background: linear-gradient(90deg, #f0887d, #e4412e, #c73524, #dc2626);
   outline: none;
 }
 
 .spicy-slider::-webkit-slider-thumb {
   appearance: none;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: white;
   border: 3px solid var(--primary-dark);

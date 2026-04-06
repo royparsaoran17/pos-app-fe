@@ -135,16 +135,20 @@
           <div v-if="!minimized" class="sidebar-items" :class="{ collapsed: !isOpen('keu') }">
             <NuxtLink to="/admin/finance" class="nav-item" title="Buku Kas"><i class="bi bi-journal-text"></i> <span class="nav-text">Buku Kas</span></NuxtLink>
             <NuxtLink to="/admin/stocks" class="nav-item" title="Stok Masuk"><i class="bi bi-box-seam"></i> <span class="nav-text">Stok Masuk</span></NuxtLink>
+            <NuxtLink to="/admin/topping-stock" class="nav-item" title="Stok Topping"><i class="bi bi-pie-chart"></i> <span class="nav-text">Stok Topping</span></NuxtLink>
             <NuxtLink to="/admin/expenses" class="nav-item" title="Pengeluaran"><i class="bi bi-wallet2"></i> <span class="nav-text">Pengeluaran</span></NuxtLink>
             <NuxtLink to="/admin/daily-recap" class="nav-item" title="Rekap Harian"><i class="bi bi-calendar-check"></i> <span class="nav-text">Rekap Harian</span></NuxtLink>
             <NuxtLink to="/admin/reports" class="nav-item" title="Laporan"><i class="bi bi-bar-chart-line"></i> <span class="nav-text">Laporan</span></NuxtLink>
+            <NuxtLink to="/admin/analytics" class="nav-item" title="Analytics"><i class="bi bi-graph-up-arrow"></i> <span class="nav-text">Analytics</span></NuxtLink>
           </div>
           <div v-else class="sidebar-items-mini">
             <NuxtLink to="/admin/finance" class="nav-item" title="Buku Kas"><i class="bi bi-journal-text"></i></NuxtLink>
             <NuxtLink to="/admin/stocks" class="nav-item" title="Stok Masuk"><i class="bi bi-box-seam"></i></NuxtLink>
+            <NuxtLink to="/admin/topping-stock" class="nav-item" title="Stok Topping"><i class="bi bi-pie-chart"></i></NuxtLink>
             <NuxtLink to="/admin/expenses" class="nav-item" title="Pengeluaran"><i class="bi bi-wallet2"></i></NuxtLink>
             <NuxtLink to="/admin/daily-recap" class="nav-item" title="Rekap Harian"><i class="bi bi-calendar-check"></i></NuxtLink>
             <NuxtLink to="/admin/reports" class="nav-item" title="Laporan"><i class="bi bi-bar-chart-line"></i></NuxtLink>
+            <NuxtLink to="/admin/analytics" class="nav-item" title="Analytics"><i class="bi bi-graph-up-arrow"></i></NuxtLink>
           </div>
         </div>
 
@@ -190,7 +194,13 @@ onMounted(() => {
   try {
     const saved = localStorage.getItem('sidebar_groups')
     if (saved) openGroups.value = JSON.parse(saved)
-    minimized.value = localStorage.getItem('sidebar_mini') === '1'
+    const savedMini = localStorage.getItem('sidebar_mini')
+    if (savedMini !== null) {
+      minimized.value = savedMini === '1'
+    } else {
+      // Default: minimized for staff, expanded for superadmin
+      minimized.value = store.isStaff
+    }
     emit('update:minimized', minimized.value)
   } catch {}
 })

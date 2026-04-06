@@ -37,8 +37,11 @@
                   <input v-model="item.notes" class="form-control form-control-sm" placeholder="Opsional" />
                 </td>
               </tr>
-              <tr v-if="!items.length">
+              <tr v-if="loading">
                 <td colspan="4" class="text-center text-muted py-4">Memuat data...</td>
+              </tr>
+              <tr v-else-if="!items.length && !errorMsg">
+                <td colspan="4" class="text-center text-muted py-4">Tidak ada data topping</td>
               </tr>
             </tbody>
           </table>
@@ -50,6 +53,7 @@
           </button>
         </div>
 
+        <div v-if="errorMsg" class="alert alert-danger mt-3 fz-13 mb-0">{{ errorMsg }}</div>
         <div v-if="saveMsg" class="alert alert-success mt-3 fz-13 mb-0">{{ saveMsg }}</div>
       </div>
     </div>
@@ -59,26 +63,40 @@
 <script setup>
 import { useMainStore } from '~/stores'
 import { todayJakarta } from '~/utils/format'
-definePageMeta({ layout: 'dashboard' })
+definePageMeta({ layout: 'dashboard', middleware: 'auth' })
 
 const store = useMainStore()
 const selectedDate = ref(todayJakarta())
 const items = ref([])
 const saving = ref(false)
 const saveMsg = ref('')
+const loading = ref(false)
+const errorMsg = ref('')
 
 const loadOpname = async () => {
   saveMsg.value = ''
+  errorMsg.value = ''
+  loading.value = true
   try {
     const res = await store.fetchStockOpname({ date: selectedDate.value })
     const opname = res.content
-    items.value = opname.items.map(i => ({
-      topping_id: i.topping_id || i.topping?.id,
-      topping_name: i.topping?.name || '',
-      weight_kg: i.weight_kg || 0,
-      notes: i.notes || '',
-    }))
-  } catch (e) { console.error(e) }
+    if (opname && opname.items) {
+      items.value = opname.items.map(i => ({
+        topping_id: i.topping_id || i.topping?.id,
+        topping_name: i.topping?.name || '',
+        weight_kg: i.weight_kg || 0,
+        notes: i.notes || '',
+      }))
+    } else {
+      items.value = []
+      errorMsg.value = 'Tidak ada data topping. Pastikan toko sudah dipilih.'
+    }
+  } catch (e) {
+    console.error(e)
+    errorMsg.value = e.response?.data?.message || 'Gagal memuat data stok opname'
+  } finally {
+    loading.value = false
+  }
 }
 
 const saveOpname = async () => {

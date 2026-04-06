@@ -82,6 +82,8 @@ export const useMainStore = defineStore('main', {
     async fetchReports(params) { return (await http.get('/dashboard/reports', { params })).data },
     async fetchAttendance(params) { return (await http.get('/dashboard/attendance', { params })).data },
     async fetchDailyRecap(params) { return (await http.get('/dashboard/daily-recap', { params })).data },
+    async fetchToppingStock(params) { return (await http.get('/dashboard/topping-stock', { params })).data },
+    async fetchAnalytics(params) { return (await http.get('/dashboard/analytics', { params })).data },
 
     // SOP Checklist
     async fetchSopChecklist(params) { return (await http.get('/sop/checklist', { params })).data },
@@ -196,6 +198,9 @@ export const useMainStore = defineStore('main', {
     async fetchPackagingSummary() { return (await http.get('/stock-packaging/summary-today')).data },
     async fetchPackagingAdmin(params) { return (await http.get('/stock-packaging/admin', { params })).data },
     async deletePackaging(id) { return (await http.delete(`/stock-packaging/${id}`)).data },
+
+    // Photobooth
+    async uploadPhotoStrip(payload) { return (await http.post('/photobooth/upload', payload)).data },
 
     // Store Management
     async adminFetchStores(params) { return (await http.get('/admin/stores', { params })).data },

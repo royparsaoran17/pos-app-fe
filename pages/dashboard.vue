@@ -56,6 +56,24 @@
       </div>
     </div>
 
+    <!-- Low Stock Alert -->
+    <div v-if="lowStockAlerts.length > 0" class="alert alert-danger mb-4 fz-13">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="fw-700"><i class="bi bi-exclamation-triangle-fill me-1"></i> Peringatan Stok Rendah ({{ lowStockAlerts.length }} topping)</span>
+        <NuxtLink to="/admin/topping-stock" class="btn btn-sm btn-outline-danger fz-12">Lihat Detail</NuxtLink>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <span
+          v-for="item in lowStockAlerts"
+          :key="item.id"
+          class="badge"
+          :class="item.current_stock_gram <= 0 ? 'bg-danger' : 'bg-warning text-dark'"
+        >
+          {{ item.name }}: {{ item.current_stock_gram <= 0 ? 'HABIS' : Math.round(item.current_stock_gram) + 'g' }}
+        </span>
+      </div>
+    </div>
+
     <!-- Pie Charts Row -->
     <div class="row g-3 mb-4">
       <div class="col-md-6">
@@ -214,6 +232,7 @@ const stats = ref({
 })
 
 const staffList = ref([])
+const lowStockAlerts = ref([])
 
 const paymentColors = { CASH: '#4e79a7', QRIS: '#f28e2b', PROMO: '#e15759', GOJEK: '#59a14f' }
 const sizeColors = { SMALL: '#76b7b2', MEDIUM: '#4e79a7', LARGE: '#f28e2b', THINWALL: '#edc948' }
@@ -250,12 +269,16 @@ const getSizeLabel = (key) => {
 
 onMounted(async () => {
   try {
-    const [statsRes, staffRes] = await Promise.all([
+    const [statsRes, staffRes, stockRes] = await Promise.all([
       store.fetchDashboardStats(),
       store.fetchStaffList(),
+      store.fetchToppingStock({}).catch(() => null),
     ])
     stats.value = statsRes.content
     staffList.value = staffRes.content
+    if (stockRes?.content?.toppings) {
+      lowStockAlerts.value = stockRes.content.toppings.filter(t => t.current_stock_gram < 500)
+    }
   } catch (err) {
     console.error('Failed to load dashboard:', err)
   }

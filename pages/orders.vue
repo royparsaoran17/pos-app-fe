@@ -133,6 +133,7 @@
           <div class="modal-body">
             <div class="mb-2"><strong>No. Order:</strong> {{ selectedOrder.order_number }}</div>
             <div v-if="selectedOrder.customer_name" class="mb-2"><strong>Customer:</strong> {{ selectedOrder.customer_name }}</div>
+            <div v-if="selectedOrder.acquisition_channel" class="mb-2"><strong>Tau Dari:</strong> <span class="badge bg-info fz-11">{{ selectedOrder.acquisition_channel }}</span></div>
             <div class="mb-2"><strong>Kasir:</strong> {{ selectedOrder.staff?.name }}</div>
             <div v-if="selectedOrder.member" class="mb-2"><strong>Member:</strong> {{ selectedOrder.member.name || selectedOrder.member.phone }}</div>
             <div class="mb-2"><strong>Pembayaran:</strong> {{ selectedOrder.payment_method }}</div>

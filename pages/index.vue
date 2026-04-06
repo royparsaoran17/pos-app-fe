@@ -12,7 +12,7 @@
 
           <!-- SIZE SELECTION (dynamic from DB) -->
           <div class="mb-4">
-            <label class="fw-600 fz-14 mb-2 d-block">Pilih Ukuran</label>
+            <label class="fw-700 mb-2 d-block" style="font-size:16px">Pilih Ukuran</label>
             <div class="row g-2">
               <div v-for="size in sizes" :key="size.key" class="col-6 col-md-3">
                 <div
@@ -34,51 +34,61 @@
           <template v-if="isCurrentSizeFood">
             <!-- TOPPING SELECTION -->
             <div class="mb-4">
-              <label class="fw-600 fz-14 mb-1 d-block">
+              <label class="fw-700 mb-1 d-block" style="font-size:16px">
                 Pilih Topping
                 <span v-if="maxToppings" class="text-muted fz-12">
-                  (maks {{ maxToppings }}, dipilih: {{ currentItem.topping_ids.length }})
+                  (maks {{ maxToppings }} porsi, terpakai: {{ currentItem.topping_ids.length }})
                 </span>
                 <span v-else class="text-muted fz-12">
-                  (tanpa batas{{ currentTotalGram ? ', total ' + currentTotalGram + 'g' : '' }})
+                  (tanpa batas{{ currentTotalGram ? ', total ' + currentTotalGram + 'g' : '' }}, porsi: {{ currentItem.topping_ids.length }})
                 </span>
               </label>
-              <div class="mt-2">
-                <span
+              <div class="topping-grid mt-2">
+                <div
                   v-for="topping in toppings"
                   :key="topping.id"
-                  class="topping-chip"
+                  class="topping-card"
                   :class="{
-                    selected: currentItem.topping_ids.includes(topping.id),
-                    disabled: !currentItem.topping_ids.includes(topping.id) && isToppingLimitReached,
+                    selected: getToppingQty(topping.id) > 0,
+                    disabled: getToppingQty(topping.id) === 0 && isToppingLimitReached,
                   }"
                   @click="toggleTopping(topping.id)"
                 >
-                  <i v-if="currentItem.topping_ids.includes(topping.id)" class="bi bi-check-circle-fill me-1"></i>
-                  {{ topping.name }}
-                  <span v-if="currentItem.topping_ids.includes(topping.id) && calcToppingGram(topping) > 0" class="fz-11 ms-1 opacity-75">
-                    ({{ calcToppingGram(topping) }}g)
-                  </span>
-                </span>
+                  <div class="topping-card-body">
+                    <div class="topping-name">{{ topping.name }}</div>
+                    <div v-if="getToppingQty(topping.id) > 0 && calcToppingGram(topping) > 0" class="topping-gram">
+                      {{ calcToppingGram(topping) }}g
+                    </div>
+                  </div>
+                  <div v-if="getToppingQty(topping.id) > 0" class="topping-qty-controls">
+                    <button class="qty-btn" @click.stop="decrementTopping(topping.id)">
+                      <i class="bi bi-dash"></i>
+                    </button>
+                    <span class="qty-value">{{ getToppingQty(topping.id) }}</span>
+                    <button class="qty-btn" :disabled="isToppingLimitReached" @click.stop="incrementTopping(topping.id)">
+                      <i class="bi bi-plus"></i>
+                    </button>
+                  </div>
+                </div>
               </div>
               <!-- Gram info box - limited sizes -->
               <div v-if="currentItem.topping_ids.length > 0 && maxToppings && portionMultiplier > 1" class="alert alert-info fz-12 py-2 mt-2 mb-0">
                 <i class="bi bi-info-circle me-1"></i>
-                {{ currentItem.topping_ids.length }} topping dipilih dari maks {{ maxToppings }} porsi &rarr; setiap topping dapat <strong>{{ portionMultiplier }}x</strong> porsi
+                {{ currentItem.topping_ids.length }} porsi topping dari maks {{ maxToppings }} &rarr; sisa {{ maxToppings - currentItem.topping_ids.length }} porsi
               </div>
               <!-- Gram info box - unlimited sizes with total gram -->
               <div v-if="currentItem.topping_ids.length > 0 && !maxToppings && currentTotalGram" class="alert alert-info fz-12 py-2 mt-2 mb-0">
                 <i class="bi bi-info-circle me-1"></i>
-                Total {{ currentTotalGram }}g &divide; {{ currentItem.topping_ids.length }} topping = <strong>{{ Math.round(currentTotalGram / currentItem.topping_ids.length) }}g</strong> per topping
+                Total {{ currentTotalGram }}g &divide; {{ currentItem.topping_ids.length }} porsi = <strong>{{ Math.round(currentTotalGram / currentItem.topping_ids.length) }}g</strong> per porsi
               </div>
             </div>
 
             <!-- BUMBU SELECTION (multi) -->
             <div class="mb-4">
-              <label class="fw-600 fz-14 mb-2 d-block">
+              <label class="fw-700 mb-2 d-block" style="font-size:16px">
                 Pilih Bumbu <span class="text-muted fz-12">(min 1, dipilih: {{ currentItem.bumbu.length }})</span>
               </label>
-              <div>
+              <div class="d-flex flex-wrap gap-2">
                 <span
                   v-for="b in bumbuList"
                   :key="b.id"
@@ -94,14 +104,14 @@
 
             <!-- SPICY LEVEL -->
             <div class="mb-4">
-              <label class="fw-600 fz-14 mb-2 d-block">
-                Level Pedas: <span class="text-danger fw-700">{{ currentItem.spicy_level }}</span>
+              <label class="fw-600 mb-2 d-block" style="font-size:16px">
+                Level Pedas: <span class="text-danger fw-700" style="font-size:20px">{{ currentItem.spicy_level }}</span>
                 <span class="ms-2">
                   <span v-for="n in Math.floor(currentItem.spicy_level)" :key="n">🌶️</span>
                 </span>
               </label>
               <input v-model.number="currentItem.spicy_level" type="range" class="spicy-slider" min="0.5" max="5" step="0.5" />
-              <div class="d-flex justify-content-between fz-12 text-muted mt-1">
+              <div class="d-flex justify-content-between fz-13 text-muted mt-2">
                 <span>0.5 (Ringan)</span>
                 <span>5 (Sangat Pedas)</span>
               </div>
@@ -112,6 +122,17 @@
           <div v-if="currentItem.size && !isCurrentSizeFood" class="mb-4">
             <div class="alert alert-info fz-13 py-2 mb-0">
               <i class="bi bi-cup-straw me-1"></i> Minuman — tidak perlu pilih topping, bumbu, atau level pedas.
+            </div>
+          </div>
+
+          <!-- UPSELL PROMPT: Medium → Thinwall -->
+          <div v-if="showUpsell" class="alert alert-warning fz-13 py-2 mb-3 d-flex align-items-center gap-2">
+            <i class="bi bi-lightning-charge-fill text-warning"></i>
+            <div>
+              <strong>Upgrade ke Thinwall?</strong> Hanya +{{ formatRupiah(upsellPriceDiff) }} — dapat lebih banyak topping tanpa batas!
+              <button class="btn btn-warning btn-sm ms-2 py-0 px-2 fz-12 fw-600" @click="upgradeToThinwall">
+                Upgrade <i class="bi bi-arrow-up-circle ms-1"></i>
+              </button>
             </div>
           </div>
 
@@ -204,6 +225,23 @@
                     {{ pm.label }}
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <!-- Tau Dari Mana -->
+            <div class="mt-3">
+              <label class="fw-600 fz-14 mb-2 d-block">Tau Dari Mana?</label>
+              <div class="d-flex flex-wrap gap-1">
+                <span
+                  v-for="ch in acquisitionChannels"
+                  :key="ch"
+                  class="badge rounded-pill cursor-pointer fz-12 py-1 px-2"
+                  :class="acquisitionChannel === ch ? 'bg-primary' : 'bg-light text-dark border'"
+                  @click="acquisitionChannel = ch"
+                  style="cursor:pointer"
+                >
+                  {{ ch }}
+                </span>
               </div>
             </div>
 
@@ -300,6 +338,11 @@ const orderItems = ref([])
 const customerName = ref('')
 const paymentMethod = ref(null)
 const notes = ref('')
+const acquisitionChannel = ref('Pembeli Lama')
+const acquisitionChannels = [
+  'Pembeli Lama', 'Kebetulan Lewat', 'Teman', 'Sering Lewat',
+  'TikTok', 'Instagram', 'Banner', 'KOL', 'Pembeli Baru',
+]
 const submitting = ref(false)
 const showReceipt = ref(false)
 const lastOrder = ref(null)
@@ -370,17 +413,24 @@ const totalPrice = computed(() => {
   return Math.max(0, subtotal.value - disc)
 })
 
+// Default bumbu names (most popular: 94% Asin, 81% Minyak Bawang, 81% Daun Jeruk)
+const defaultBumbuNames = ['Asin', 'Minyak Bawang', 'Daun Jeruk']
+
 const selectSize = (key) => {
+  const prevSize = currentItem.value.size
   currentItem.value.size = key
   const sizeData = sizeMap.value[key]
   if (sizeData?.category === 'DRINK') {
-    // Clear food-specific fields for drinks
     currentItem.value.topping_ids = []
     currentItem.value.bumbu = []
     currentItem.value.spicy_level = 0
   } else {
-    // Restore default spicy if switching back to food
     if (currentItem.value.spicy_level === 0) currentItem.value.spicy_level = 2
+    // Auto-select default bumbu if bumbu is empty (new item or switching from drink)
+    if (currentItem.value.bumbu.length === 0 || sizeMap.value[prevSize]?.category === 'DRINK') {
+      const available = bumbuList.value.map(b => b.name)
+      currentItem.value.bumbu = defaultBumbuNames.filter(b => available.includes(b))
+    }
     const limit = sizeData?.max_toppings
     if (limit && currentItem.value.topping_ids.length > limit) {
       currentItem.value.topping_ids = currentItem.value.topping_ids.slice(0, limit)
@@ -388,13 +438,53 @@ const selectSize = (key) => {
   }
 }
 
+// Upsell: suggest Thinwall when ordering Medium
+const showUpsell = computed(() => {
+  if (!currentItem.value.size) return false
+  const sizeData = sizeMap.value[currentItem.value.size]
+  if (!sizeData) return false
+  // Show upsell for sizes that are not the biggest food size and are FOOD category
+  return sizeData.category === 'FOOD' && sizeData.key === 'MEDIUM'
+})
+
+const upsellPriceDiff = computed(() => {
+  const medium = sizeMap.value['MEDIUM']
+  const thinwall = sizeMap.value['THINWALL']
+  if (!medium || !thinwall) return 0
+  return thinwall.price - medium.price
+})
+
+const upgradeToThinwall = () => {
+  if (sizeMap.value['THINWALL']) {
+    selectSize('THINWALL')
+  }
+}
+
+// Get quantity of a specific topping
+const getToppingQty = (id) => {
+  return currentItem.value.topping_ids.filter(tid => tid === id).length
+}
+
 const toggleTopping = (id) => {
-  const idx = currentItem.value.topping_ids.indexOf(id)
-  if (idx > -1) {
-    currentItem.value.topping_ids.splice(idx, 1)
+  const qty = getToppingQty(id)
+  if (qty > 0) {
+    // Remove all instances of this topping
+    currentItem.value.topping_ids = currentItem.value.topping_ids.filter(tid => tid !== id)
   } else {
     if (isToppingLimitReached.value) return
     currentItem.value.topping_ids.push(id)
+  }
+}
+
+const incrementTopping = (id) => {
+  if (isToppingLimitReached.value) return
+  currentItem.value.topping_ids.push(id)
+}
+
+const decrementTopping = (id) => {
+  const idx = currentItem.value.topping_ids.lastIndexOf(id)
+  if (idx > -1) {
+    currentItem.value.topping_ids.splice(idx, 1)
   }
 }
 
@@ -427,51 +517,70 @@ const portionMultiplier = computed(() => {
   return Math.floor(max / selected)
 })
 
-// Calculate gram for a single topping in the current item form
+// Calculate gram for a single topping in the current item form (total gram for all portions of this topping)
 const calcToppingGram = (topping) => {
-  const selected = currentItem.value.topping_ids.length
-  if (!selected) return 0
+  const totalPortions = currentItem.value.topping_ids.length // includes duplicates
+  if (!totalPortions) return 0
+  const qty = getToppingQty(topping.id)
+  if (!qty) return 0
 
-  // Unlimited sizes (Large/Thinwall): total_topping_gram / number of toppings
   const totalGram = currentTotalGram.value
-  if (!maxToppings.value && totalGram) {
-    return Math.round(totalGram / selected)
+  const max = maxToppings.value
+
+  // Sizes with total_topping_gram (e.g. Large/Thinwall): divide total gram equally among all portions
+  if (totalGram) {
+    return Math.round((totalGram / totalPortions) * qty)
   }
 
-  // Limited sizes (Small/Medium): gram_per_portion * multiplier
+  // Limited sizes (Small/Medium) with multiplier: gram_per_portion * multiplier * qty
   if (!topping.gram_per_portion) return 0
-  return Math.round(topping.gram_per_portion * portionMultiplier.value * 10) / 10
+  if (max) {
+    const multiplier = Math.floor(max / totalPortions)
+    return Math.round(topping.gram_per_portion * multiplier * qty * 10) / 10
+  }
+
+  // Fallback (unlimited, no total_gram set): gram_per_portion * qty
+  return Math.round(topping.gram_per_portion * qty * 10) / 10
 }
 
 // Calculate gram for a topping in a saved order item (order summary)
 const calcItemToppingGram = (item, toppingId) => {
-  const selected = item.topping_ids.length
-  if (!selected) return 0
+  const totalPortions = item.topping_ids.length
+  if (!totalPortions) return 0
+  const qty = item.topping_ids.filter(id => id === toppingId).length
 
   const sizeData = sizeMap.value[item.size]
 
-  // Unlimited sizes: total_topping_gram / number of toppings
-  if (!sizeData?.max_toppings && sizeData?.total_topping_gram) {
-    return Math.round(sizeData.total_topping_gram / selected)
+  // Sizes with total_topping_gram: divide equally among all portions
+  if (sizeData?.total_topping_gram) {
+    return Math.round((sizeData.total_topping_gram / totalPortions) * qty)
   }
 
-  // Limited sizes: gram_per_portion * multiplier
+  // Fallback: gram_per_portion based
   const topping = toppings.value.find(t => t.id === toppingId)
   if (!topping?.gram_per_portion) return 0
   const max = sizeData?.max_toppings
-  if (!max) return topping.gram_per_portion
-  const multiplier = Math.floor(max / selected)
-  return Math.round(topping.gram_per_portion * multiplier * 10) / 10
+  if (max) {
+    const multiplier = Math.floor(max / totalPortions)
+    return Math.round(topping.gram_per_portion * multiplier * qty * 10) / 10
+  }
+  return Math.round(topping.gram_per_portion * qty * 10) / 10
 }
 
-// Topping names with gram info for order summary
+// Topping names with gram info and quantity for order summary
 const getToppingNamesWithGram = (item) => {
   if (!item.topping_ids || item.topping_ids.length === 0) return '-'
-  return item.topping_ids.map((id) => {
-    const t = toppings.value.find((tp) => tp.id === id)
+  // Group by unique topping IDs with count
+  const countMap = {}
+  item.topping_ids.forEach(id => { countMap[id] = (countMap[id] || 0) + 1 })
+  return Object.entries(countMap).map(([id, qty]) => {
+    const t = toppings.value.find((tp) => tp.id === Number(id))
     if (!t) return id
-    const gram = calcItemToppingGram(item, id)
-    return gram > 0 ? `${t.name} (${gram}g)` : t.name
+    const gram = calcItemToppingGram(item, Number(id))
+    let label = t.name
+    if (qty > 1) label += ` x${qty}`
+    if (gram > 0) label += ` (${gram}g)`
+    return label
   }).join(', ')
 }
 
@@ -520,6 +629,7 @@ const submitOrder = async () => {
     const payload = {
       items: orderItems.value,
       customer_name: customerName.value.trim(),
+      acquisition_channel: acquisitionChannel.value || undefined,
       payment_method: paymentMethod.value,
       notes: notes.value || undefined,
       member_phone: memberPhone.value || undefined,
@@ -539,6 +649,7 @@ const submitOrder = async () => {
     customerName.value = ''
     paymentMethod.value = null
     notes.value = ''
+    acquisitionChannel.value = 'Pembeli Lama'
     currentItem.value = defaultItem()
     clearMember()
     clearPromo()
