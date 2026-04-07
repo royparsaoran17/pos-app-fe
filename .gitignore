@@ -1,14 +1,13 @@
 # Dependencies
 node_modules
 
-# Build outputs (will be built in container)
+# Build outputs
 .output
 .nuxt
 dist
 
 # Git
 .git
-.gitignore
 
 # Environment files
 .env
@@ -29,15 +28,6 @@ Thumbs.db
 logs
 *.log
 npm-debug.log*
-
-# Docker
-Dockerfile
-docker-compose*.yml
-.dockerignore
-
-# Documentation
-README.md
-CHANGELOG.md
 
 # Claude
 .claude
