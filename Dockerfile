@@ -24,6 +24,6 @@ RUN chmod +x /app/docker-entrypoint.sh
 EXPOSE 3000
 
 ENV HOST=0.0.0.0 PORT=3000 NITRO_PORT=3000 NITRO_HOST=0.0.0.0
-ENV API_BASE_URL=http://localhost:9005
+ENV VITE_API_BASE_URL=http://localhost:9005
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
