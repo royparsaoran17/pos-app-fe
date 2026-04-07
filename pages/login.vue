@@ -76,10 +76,26 @@
 <script setup>
 import { useMainStore } from '~/stores'
 
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'default', middleware: [] })
 
 const store = useMainStore()
 const router = useRouter()
+
+// Redirect logged-in users away from login page
+onMounted(() => {
+  const token = localStorage.getItem('pos_token')
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      if (payload.exp && payload.exp * 1000 > Date.now()) {
+        // Token is valid, redirect to home
+        router.replace('/')
+      }
+    } catch {
+      // Invalid token, stay on login page
+    }
+  }
+})
 
 const selectedRole = ref(null)
 const email = ref('')
