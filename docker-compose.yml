@@ -10,4 +10,10 @@ services:
       - NITRO_PORT=3000
       - NITRO_HOST=0.0.0.0
       - API_BASE_URL=${API_BASE_URL:-http://localhost:9005}
+    networks:
+      - global-network
     restart: unless-stopped
+
+networks:
+  global-network:
+    external: true
