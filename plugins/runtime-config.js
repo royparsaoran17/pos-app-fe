@@ -1,11 +1,11 @@
 export default defineNuxtPlugin(() => {
   const config = window.__APP_CONFIG__ || {
-    apiBase: "http://localhost:9005"
+    apiBase: "https://omt-api.gct.my.id",
   };
 
   return {
     provide: {
-      runtimeConfig: config
-    }
+      runtimeConfig: config,
+    },
   };
 });

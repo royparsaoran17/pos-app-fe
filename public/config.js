@@ -1,3 +1,3 @@
 window.__APP_CONFIG__ = {
-  apiBase: "http://localhost:9005"
+  apiBase: "https://omt-api.gct.my.id",
 };
