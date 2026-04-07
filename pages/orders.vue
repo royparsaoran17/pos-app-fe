@@ -152,6 +152,7 @@
                 <div><strong>Topping:</strong> {{ item.toppings?.map(t => t.topping?.name).join(', ') || '-' }}</div>
                 <div><strong>Bumbu:</strong> {{ item.bumbu }}</div>
                 <div><strong>Level Pedas:</strong> {{ item.spicy_level }}</div>
+                <div v-if="item.additionals?.length"><strong>Additional:</strong> {{ item.additionals.map(a => a.additional?.name + (a.qty > 1 ? ' x' + a.qty : '')).join(', ') }}</div>
               </div>
             </div>
           </div>

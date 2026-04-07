@@ -69,6 +69,14 @@ export const useMainStore = defineStore('main', {
       this.paymentMethods = res.data.content
       return res.data
     },
+    async fetchAdditionals() {
+      const res = await http.get('/master/additionals')
+      return res.data
+    },
+    async fetchActivePromos() {
+      const res = await http.get('/master/active-promos')
+      return res.data
+    },
 
     // Orders
     async createOrder(payload) { return (await http.post('/orders', payload)).data },
@@ -103,6 +111,11 @@ export const useMainStore = defineStore('main', {
     async adminDeleteTopping(id) { return (await http.delete(`/admin/toppings/${id}`)).data },
 
     // Admin - Bumbu
+    async adminFetchAdditionals(params) { return (await http.get('/admin/additionals', { params })).data },
+    async adminCreateAdditional(payload) { return (await http.post('/admin/additionals', payload)).data },
+    async adminUpdateAdditional(id, payload) { return (await http.put(`/admin/additionals/${id}`, payload)).data },
+    async adminDeleteAdditional(id) { return (await http.delete(`/admin/additionals/${id}`)).data },
+
     async adminFetchBumbu(params) { return (await http.get('/admin/bumbu', { params })).data },
     async adminCreateBumbu(payload) { return (await http.post('/admin/bumbu', payload)).data },
     async adminUpdateBumbu(id, payload) { return (await http.put(`/admin/bumbu/${id}`, payload)).data },

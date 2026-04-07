@@ -56,6 +56,12 @@
           <div style="margin-top: 4px"><span style="font-weight: bold; font-size: 12px">Bumbu:</span> {{ item.bumbu }}</div>
           <div><span style="font-weight: bold; font-size: 12px">Pedas:</span> {{ item.spicy_level }} <span v-for="n in Math.floor(item.spicy_level)" :key="n">🌶️</span></div>
         </div>
+        <div v-if="item.additionals?.length" style="padding-left: 4px; margin-top: 4px">
+          <div style="font-weight: bold; font-size: 12px">Additional:</div>
+          <div v-for="add in item.additionals" :key="add.id" style="padding-left: 8px; font-size: 12px">
+            &bull; {{ add.additional?.name }}{{ add.qty > 1 ? ' x' + add.qty : '' }}
+          </div>
+        </div>
       </div>
 
       <div class="receipt-divider" style="border-top: 2px dashed #000"></div>

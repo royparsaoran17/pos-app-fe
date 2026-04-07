@@ -72,6 +72,7 @@ const pageTitle = computed(() => {
     '/admin/toppings': 'Kelola Topping',
     '/admin/bumbu': 'Kelola Bumbu',
     '/admin/menu-sizes': 'Kelola Menu / Ukuran',
+    '/admin/additionals': 'Kelola Additional',
     '/admin/promos': 'Kelola Promo',
     '/admin/members': 'Kelola Member',
     '/admin/staff': 'Kelola Staff',

@@ -98,6 +98,7 @@
             <NuxtLink to="/admin/menu-sizes" class="nav-item" title="Menu / Ukuran"><i class="bi bi-grid"></i> <span class="nav-text">Menu / Ukuran</span></NuxtLink>
             <NuxtLink to="/admin/toppings" class="nav-item" title="Topping"><i class="bi bi-puzzle"></i> <span class="nav-text">Topping</span></NuxtLink>
             <NuxtLink to="/admin/bumbu" class="nav-item" title="Bumbu"><i class="bi bi-droplet"></i> <span class="nav-text">Bumbu</span></NuxtLink>
+            <NuxtLink to="/admin/additionals" class="nav-item" title="Additional"><i class="bi bi-plus-square"></i> <span class="nav-text">Additional</span></NuxtLink>
             <NuxtLink to="/admin/promos" class="nav-item" title="Promo"><i class="bi bi-tag"></i> <span class="nav-text">Promo</span></NuxtLink>
             <NuxtLink to="/admin/members" class="nav-item" title="Member"><i class="bi bi-people"></i> <span class="nav-text">Member</span></NuxtLink>
           </div>
@@ -105,6 +106,7 @@
             <NuxtLink to="/admin/menu-sizes" class="nav-item" title="Menu / Ukuran"><i class="bi bi-grid"></i></NuxtLink>
             <NuxtLink to="/admin/toppings" class="nav-item" title="Topping"><i class="bi bi-puzzle"></i></NuxtLink>
             <NuxtLink to="/admin/bumbu" class="nav-item" title="Bumbu"><i class="bi bi-droplet"></i></NuxtLink>
+            <NuxtLink to="/admin/additionals" class="nav-item" title="Additional"><i class="bi bi-plus-square"></i></NuxtLink>
             <NuxtLink to="/admin/promos" class="nav-item" title="Promo"><i class="bi bi-tag"></i></NuxtLink>
             <NuxtLink to="/admin/members" class="nav-item" title="Member"><i class="bi bi-people"></i></NuxtLink>
           </div>

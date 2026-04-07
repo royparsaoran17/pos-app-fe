@@ -52,6 +52,11 @@
           <div>Bumbu: {{ item.bumbu }}</div>
           <div>Pedas: {{ item.spicy_level }}</div>
         </div>
+        <div v-if="item.additionals?.length" style="font-size: 10px; padding-left: 16px; line-height: 1.5">
+          <div v-for="add in item.additionals" :key="add.id">
+            + {{ add.additional?.name }}{{ add.qty > 1 ? ' x' + add.qty : '' }} {{ formatRupiah(add.price * add.qty) }}
+          </div>
+        </div>
       </div>
 
       <div class="receipt-divider"></div>

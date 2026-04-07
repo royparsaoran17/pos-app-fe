@@ -125,6 +125,30 @@
             </div>
           </div>
 
+          <!-- ADDITIONAL (Cheese, Chili Oil, etc.) -->
+          <div v-if="additionalsList.length > 0" class="mb-4">
+            <label class="fw-700 mb-2 d-block" style="font-size:16px">
+              Additional <span class="text-muted fz-12">(opsional)</span>
+            </label>
+            <div class="d-flex flex-wrap gap-2">
+              <div
+                v-for="add in additionalsList"
+                :key="add.id"
+                class="additional-chip"
+                :class="{ selected: getAdditionalQty(add.id) > 0 }"
+                @click="toggleAdditional(add.id)"
+              >
+                <span class="additional-name">{{ add.name }}</span>
+                <span class="additional-price">+{{ formatRupiah(add.price) }}</span>
+                <div v-if="getAdditionalQty(add.id) > 0" class="additional-qty-controls" @click.stop>
+                  <button class="qty-btn-sm" @click="decrementAdditional(add.id)"><i class="bi bi-dash"></i></button>
+                  <span class="qty-val">{{ getAdditionalQty(add.id) }}</span>
+                  <button class="qty-btn-sm" @click="incrementAdditional(add.id)"><i class="bi bi-plus"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- UPSELL PROMPT: Medium → Thinwall -->
           <div v-if="showUpsell" class="alert alert-warning fz-13 py-2 mb-3 d-flex align-items-center gap-2">
             <i class="bi bi-lightning-charge-fill text-warning"></i>
@@ -175,6 +199,12 @@
               <div><strong>Bumbu:</strong> {{ Array.isArray(item.bumbu) ? item.bumbu.join(', ') : item.bumbu }}</div>
               <div><strong>Level Pedas:</strong> {{ item.spicy_level }}</div>
             </div>
+            <div v-if="item.additionals && item.additionals.length > 0" class="fz-12 text-muted">
+              <div><strong>Additional:</strong> {{ getAdditionalSummary(item) }}</div>
+            </div>
+            <div v-if="getItemAdditionalTotal(item) > 0" class="fz-12 text-success fw-600">
+              + {{ formatRupiah(getItemAdditionalTotal(item)) }} (additional)
+            </div>
           </div>
 
           <template v-if="orderItems.length > 0">
@@ -196,9 +226,25 @@
               </div>
             </div>
 
-            <!-- Promo Code -->
+            <!-- Promo / Diskon -->
             <div class="mt-3">
-              <label class="fw-600 fz-14 mb-1">Kode Promo (opsional)</label>
+              <label class="fw-600 fz-14 mb-1">Diskon</label>
+              <!-- Quick-apply promo suggestions -->
+              <div v-if="!promoApplied && activePromos.length > 0" class="d-flex flex-wrap gap-1 mb-2">
+                <button
+                  v-for="p in activePromos"
+                  :key="p.id"
+                  class="btn btn-sm promo-suggest-btn"
+                  :disabled="validatingPromo"
+                  @click="quickApplyPromo(p.code)"
+                >
+                  <i class="bi bi-tag-fill me-1"></i>
+                  {{ p.code }}
+                  <span class="fz-11 ms-1 opacity-75">
+                    ({{ p.discount_type === 'PERCENTAGE' ? p.discount_value + '%' : formatRupiah(p.discount_value) }})
+                  </span>
+                </button>
+              </div>
               <div class="input-group">
                 <input v-model="promoCode" class="form-control fz-13" placeholder="Masukkan kode promo" :disabled="promoApplied" />
                 <button v-if="!promoApplied" class="btn btn-outline-primary btn-sm" :disabled="!promoCode || validatingPromo" @click="applyPromo">
@@ -331,7 +377,10 @@ const paymentMethods = ref([
   { key: 'GOJEK', label: 'Gojek' },
 ])
 
-const defaultItem = () => ({ size: null, topping_ids: [], bumbu: [], spicy_level: 2 })
+const additionalsList = ref([])
+const activePromos = ref([])
+
+const defaultItem = () => ({ size: null, topping_ids: [], bumbu: [], spicy_level: 2, additionals: [] })
 
 const currentItem = ref(defaultItem())
 const orderItems = ref([])
@@ -404,7 +453,12 @@ const toggleBumbu = (name) => {
 
 const subtotal = computed(() => {
   return orderItems.value.reduce((sum, item) => {
-    return sum + (sizeMap.value[item.size]?.price || 0)
+    let itemTotal = sizeMap.value[item.size]?.price || 0
+    for (const add of (item.additionals || [])) {
+      const addData = additionalsList.value.find(a => a.id === add.additional_id)
+      if (addData) itemTotal += addData.price * (add.qty || 1)
+    }
+    return sum + itemTotal
   }, 0)
 })
 
@@ -489,9 +543,13 @@ const decrementTopping = (id) => {
 }
 
 const addItem = () => {
-  orderItems.value.push({ ...currentItem.value, topping_ids: [...currentItem.value.topping_ids], bumbu: [...currentItem.value.bumbu] })
+  orderItems.value.push({
+    ...currentItem.value,
+    topping_ids: [...currentItem.value.topping_ids],
+    bumbu: [...currentItem.value.bumbu],
+    additionals: [...currentItem.value.additionals],
+  })
   currentItem.value = defaultItem()
-  // Re-validate promo when items change
   if (promoApplied.value) clearPromo()
 }
 
@@ -623,6 +681,59 @@ const clearPromo = () => {
   promoError.value = ''
 }
 
+const quickApplyPromo = (code) => {
+  promoCode.value = code
+  applyPromo()
+}
+
+// Additional helpers
+const getAdditionalQty = (id) => {
+  const found = currentItem.value.additionals.find(a => a.additional_id === id)
+  return found?.qty || 0
+}
+
+const toggleAdditional = (id) => {
+  const idx = currentItem.value.additionals.findIndex(a => a.additional_id === id)
+  if (idx > -1) {
+    currentItem.value.additionals.splice(idx, 1)
+  } else {
+    currentItem.value.additionals.push({ additional_id: id, qty: 1 })
+  }
+}
+
+const incrementAdditional = (id) => {
+  const found = currentItem.value.additionals.find(a => a.additional_id === id)
+  if (found) found.qty++
+}
+
+const decrementAdditional = (id) => {
+  const found = currentItem.value.additionals.find(a => a.additional_id === id)
+  if (!found) return
+  if (found.qty <= 1) {
+    currentItem.value.additionals = currentItem.value.additionals.filter(a => a.additional_id !== id)
+  } else {
+    found.qty--
+  }
+}
+
+const getAdditionalSummary = (item) => {
+  if (!item.additionals || item.additionals.length === 0) return '-'
+  return item.additionals.map(a => {
+    const data = additionalsList.value.find(ad => ad.id === a.additional_id)
+    let label = data?.name || `#${a.additional_id}`
+    if (a.qty > 1) label += ` x${a.qty}`
+    return label
+  }).join(', ')
+}
+
+const getItemAdditionalTotal = (item) => {
+  if (!item.additionals || item.additionals.length === 0) return 0
+  return item.additionals.reduce((sum, a) => {
+    const data = additionalsList.value.find(ad => ad.id === a.additional_id)
+    return sum + (data?.price || 0) * (a.qty || 1)
+  }, 0)
+}
+
 const submitOrder = async () => {
   submitting.value = true
   try {
@@ -663,14 +774,18 @@ const closeReceipt = () => { showReceipt.value = false; lastOrder.value = null }
 
 onMounted(async () => {
   try {
-    const [toppingRes, bumbuRes, sizeRes] = await Promise.all([
+    const [toppingRes, bumbuRes, sizeRes, additionalRes, promoRes] = await Promise.all([
       store.fetchToppings(),
       store.fetchBumbu(),
       store.fetchSizes(),
+      store.fetchAdditionals(),
+      store.fetchActivePromos(),
     ])
     toppings.value = toppingRes.content
     bumbuList.value = bumbuRes.content
     sizes.value = sizeRes.content
+    additionalsList.value = additionalRes.content
+    activePromos.value = promoRes.content
   } catch (err) {
     console.error('Failed to load master data:', err)
   }
