@@ -1,10 +1,14 @@
 import axios from 'axios'
 import { useToast } from '~/composables/useToast'
 
-const API_BASE_URL = import.meta.env?.VITE_API_BASE_URL || 'http://localhost:9005'
+const getApiBaseUrl = () => {
+  if (typeof window !== 'undefined' && window.__APP_CONFIG__?.apiBase) {
+    return window.__APP_CONFIG__.apiBase
+  }
+  return import.meta.env?.VITE_API_BASE_URL || 'http://localhost:9005'
+}
 
 const http = axios.create({
-  baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -12,7 +16,9 @@ const http = axios.create({
   },
 })
 
+// Set baseURL dynamically
 http.interceptors.request.use((config) => {
+  config.baseURL = getApiBaseUrl()
   const token = localStorage.getItem('pos_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
