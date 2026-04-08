@@ -9,7 +9,7 @@ services:
       - PORT=3000
       - NITRO_PORT=3000
       - NITRO_HOST=0.0.0.0
-      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-https://omt-api.gct.my.id}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL:-https://omt-api.gct.my.idy.id}
     networks:
       - global-network
     restart: unless-stopped
