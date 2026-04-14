@@ -752,10 +752,11 @@ body {
 /* Receipt */
 .receipt {
   font-family: 'Courier New', monospace;
-  max-width: 300px;
+  max-width: 180px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 8px;
   background: white;
+  font-size: 11px;
 }
 
 .receipt .receipt-header {
@@ -773,13 +774,13 @@ body {
 .receipt .receipt-row {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: 10px;
+  line-height: 1.4;
 }
 
 .receipt .receipt-total {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 /* Table */
@@ -926,8 +927,17 @@ a, button, input, .btn {
   display: none;
 }
 
-/* Print styles */
+/* Print styles - optimized for 58mm thermal printer (OneLabel DP58) */
 @media print {
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+    width: 58mm;
+  }
   body * {
     visibility: hidden;
   }
@@ -941,7 +951,9 @@ a, button, input, .btn {
     position: absolute;
     left: 0;
     top: 0;
-    width: 80mm;
+    width: 48mm;
+    margin: 0;
+    padding: 0;
   }
   .print-only-area .receipt-print-area {
     position: relative;
@@ -950,7 +962,7 @@ a, button, input, .btn {
     position: absolute;
     left: 0;
     top: 0;
-    width: 80mm;
+    width: 48mm;
   }
   .page-break {
     display: block;
