@@ -243,11 +243,15 @@
       </div>
     </div>
 
-    <!-- Print area (both receipts) -->
+    <!-- Print area (both receipts, printed separately with delay) -->
     <div v-if="printingOrder" class="print-only-area">
-      <ReceiptPrint :order="printingOrder" :sizes="editSizes" />
+      <div class="receipt-customer-area">
+        <ReceiptPrint :order="printingOrder" :sizes="editSizes" />
+      </div>
       <div class="page-break"></div>
-      <ReceiptKitchen :order="printingOrder" :sizes="editSizes" />
+      <div class="receipt-kitchen-area">
+        <ReceiptKitchen :order="printingOrder" :sizes="editSizes" />
+      </div>
     </div>
 
     <!-- Print Modal -->

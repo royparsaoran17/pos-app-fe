@@ -92,6 +92,15 @@
           </div>
           <div style="margin-top: 3px; font-size: 7px; font-style: italic">Tag kami & dapatkan kesempatan repost!</div>
         </div>
+
+        <!-- QR Code for feedback -->
+        <div style="margin-top: 6px; border-top: 1px dashed #000; padding-top: 6px">
+          <img v-if="qrDataUrl" :src="qrDataUrl" alt="QR" style="width: 100px; height: 100px; margin: 0 auto; display: block" />
+          <div style="font-size: 7px; margin-top: 3px; font-style: italic; line-height: 1.3">
+            Berikan kami saran dengan scan QR diatas
+          </div>
+        </div>
+
         <div style="margin-top: 4px">--- Oh My Tongue ---</div>
       </div>
     </div>
@@ -99,12 +108,28 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+import QRCode from 'qrcode'
 import { formatRupiah, formatDate } from '~/utils/format'
 
 const props = defineProps({
   order: Object,
   toppings: Array,
   sizes: Array,
+})
+
+const qrDataUrl = ref('')
+
+onMounted(async () => {
+  try {
+    qrDataUrl.value = await QRCode.toDataURL('http://linktr.ee/ohmytongue', {
+      width: 200,
+      margin: 1,
+      color: { dark: '#000000', light: '#ffffff' },
+    })
+  } catch (err) {
+    console.error('Failed to generate QR code:', err)
+  }
 })
 
 const getSizeLabel = (key) => {

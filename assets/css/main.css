@@ -1,3 +1,17 @@
+/* Force landscape orientation for webapp */
+@media screen and (orientation: portrait) {
+  html {
+    transform: rotate(-90deg);
+    transform-origin: left top;
+    width: 100vh;
+    height: 100vw;
+    overflow-x: hidden;
+    position: absolute;
+    top: 100%;
+    left: 0;
+  }
+}
+
 /* OMT Styles - Professional Red Theme with Gradients */
 :root {
   --primary: #e4412e;
@@ -944,7 +958,11 @@ a, button, input, .btn {
   .print-only-area,
   .print-only-area *,
   .receipt-print-area,
-  .receipt-print-area * {
+  .receipt-print-area *,
+  .receipt-customer-area,
+  .receipt-customer-area *,
+  .receipt-kitchen-area,
+  .receipt-kitchen-area * {
     visibility: visible;
   }
   .print-only-area {
@@ -971,6 +989,20 @@ a, button, input, .btn {
   }
   .no-print {
     display: none !important;
+  }
+
+  /* Separated receipt printing: customer first, then kitchen */
+  .print-customer-only .receipt-kitchen-area,
+  .print-customer-only .receipt-kitchen-area *,
+  .print-customer-only .page-break {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  .print-kitchen-only .receipt-customer-area,
+  .print-kitchen-only .receipt-customer-area *,
+  .print-kitchen-only .page-break {
+    display: none !important;
+    visibility: hidden !important;
   }
 }
 

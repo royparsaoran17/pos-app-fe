@@ -118,21 +118,43 @@ export function usePrinter() {
       tiktok: order.store?.tiktok || '',
       notes: order.notes || '',
       createdAt: formatDate(order.created_at),
+      feedbackQrUrl: 'http://linktr.ee/ohmytongue',
+      feedbackQrMessage: 'Berikan kami saran dengan scan QR diatas',
     })
   }
 
+  /** Delay between customer and kitchen receipt (ms) — gives staff time to cut/wrap */
+  const RECEIPT_DELAY_MS = 3000
+
   /**
-   * Print both customer + kitchen receipts.
-   * Uses Android Bluetooth if available, falls back to window.print().
+   * Print both customer + kitchen receipts with a delay between them.
+   * Customer receipt prints first, then after RECEIPT_DELAY_MS the kitchen receipt prints.
+   * This gives staff time to cut/wrap the customer receipt before the kitchen one starts.
+   *
+   * Uses Android Bluetooth if available, falls back to browser window.print().
    */
   const printReceipt = (order, sizes, toppings) => {
     if (window.AndroidPrinter?.isConnected()) {
       const payload = buildPrintPayload(order, sizes, toppings)
-      window.AndroidPrinter.printBoth(payload)
+      // Print customer receipt first
+      window.AndroidPrinter.printCustomerReceipt(payload)
+      // Delay then print kitchen receipt
+      setTimeout(() => {
+        window.AndroidPrinter.printKitchenReceipt(payload)
+      }, RECEIPT_DELAY_MS)
       return true
     }
-    // Fallback: browser print
+    // Fallback: browser print — print customer first, then kitchen after delay
+    // Show only customer receipt first
+    document.body.classList.add('print-customer-only')
     window.print()
+    // After delay, switch to kitchen receipt and print again
+    setTimeout(() => {
+      document.body.classList.remove('print-customer-only')
+      document.body.classList.add('print-kitchen-only')
+      window.print()
+      document.body.classList.remove('print-kitchen-only')
+    }, RECEIPT_DELAY_MS)
     return false
   }
 

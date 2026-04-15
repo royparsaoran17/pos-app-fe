@@ -327,11 +327,15 @@
       </div>
     </div>
 
-    <!-- Auto-print area (both receipts, page-break between) -->
+    <!-- Auto-print area (both receipts, printed separately with delay) -->
     <div v-if="lastOrder" class="print-only-area">
-      <ReceiptPrint :order="lastOrder" :toppings="toppings" :sizes="sizes" />
+      <div class="receipt-customer-area">
+        <ReceiptPrint :order="lastOrder" :toppings="toppings" :sizes="sizes" />
+      </div>
       <div class="page-break"></div>
-      <ReceiptKitchen :order="lastOrder" :sizes="sizes" />
+      <div class="receipt-kitchen-area">
+        <ReceiptKitchen :order="lastOrder" :sizes="sizes" />
+      </div>
     </div>
 
     <!-- Receipt Modal (for manual reprint) -->
