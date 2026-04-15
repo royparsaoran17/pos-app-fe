@@ -359,8 +359,12 @@ const printOrder = async (order) => {
   printingOrder.value = order
 }
 
+const { printReceipt: btPrint, isAndroidApp } = usePrinter()
+
 const doPrint = () => {
-  window.print()
+  if (printingOrder.value) {
+    btPrint(printingOrder.value, editSizes.value, [])
+  }
 }
 
 const getSizeLabel = (key) => {

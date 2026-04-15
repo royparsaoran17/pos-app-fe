@@ -750,9 +750,9 @@ const submitOrder = async () => {
     const result = await store.createOrder(payload)
     lastOrder.value = result.content
 
-    // Auto-print both receipts
+    // Auto-print both receipts (Bluetooth or browser fallback)
     await nextTick()
-    window.print()
+    btPrint(lastOrder.value, sizes.value, toppings.value)
     showReceipt.value = true
 
     // Reset form
@@ -769,7 +769,8 @@ const submitOrder = async () => {
   } finally { submitting.value = false }
 }
 
-const printReceipt = () => { window.print() }
+const { printReceipt: btPrint } = usePrinter()
+const printReceipt = () => { btPrint(lastOrder.value, sizes.value, toppings.value) }
 const closeReceipt = () => { showReceipt.value = false; lastOrder.value = null }
 
 onMounted(async () => {
