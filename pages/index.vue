@@ -348,12 +348,23 @@
           </div>
           <div class="modal-body text-center py-4">
             <i class="bi bi-check-circle text-success" style="font-size: 48px"></i>
-            <p class="mt-3 fw-600">Struk Customer & Struk Dapur sudah dicetak</p>
+            <p class="mt-3 fw-600">Struk Customer sudah dicetak</p>
             <p class="fz-13 text-muted">No. Order: {{ lastOrder?.order_number }} &bull; Antrian: {{ lastOrder?.queue_number }}</p>
+            <p v-if="kitchenPrinted" class="fz-12 text-success mt-2 mb-0">
+              <i class="bi bi-check2-circle me-1"></i>Struk Dapur sudah dicetak
+            </p>
           </div>
-          <div class="modal-footer justify-content-center">
-            <button class="btn btn-outline-primary btn-sm" @click="printReceipt">
-              <i class="bi bi-printer me-1"></i> Cetak Ulang
+          <div class="modal-footer justify-content-center flex-wrap">
+            <button class="btn btn-outline-primary btn-sm" @click="reprintCustomer">
+              <i class="bi bi-printer me-1"></i> Cetak Ulang Customer
+            </button>
+            <button
+              class="btn btn-sm"
+              :class="kitchenPrinted ? 'btn-outline-warning' : 'btn-warning'"
+              @click="printKitchen"
+            >
+              <i class="bi bi-fire me-1"></i>
+              {{ kitchenPrinted ? 'Cetak Ulang Dapur' : 'Cetak Struk Dapur' }}
             </button>
             <button class="btn btn-primary btn-sm" @click="closeReceipt">Selesai</button>
           </div>
@@ -399,6 +410,7 @@ const acquisitionChannels = [
 const submitting = ref(false)
 const showReceipt = ref(false)
 const lastOrder = ref(null)
+const kitchenPrinted = ref(false)
 
 // Member
 const memberPhone = ref('')
@@ -753,10 +765,12 @@ const submitOrder = async () => {
     }
     const result = await store.createOrder(payload)
     lastOrder.value = result.content
+    kitchenPrinted.value = false
 
-    // Auto-print both receipts (Bluetooth or browser fallback)
+    // Auto-print customer receipt only. Kitchen receipt is printed manually
+    // via a separate button in the success modal.
     await nextTick()
-    btPrint(lastOrder.value, sizes.value, toppings.value)
+    btPrintCustomer(lastOrder.value, sizes.value, toppings.value)
     showReceipt.value = true
 
     // Reset form
@@ -773,9 +787,20 @@ const submitOrder = async () => {
   } finally { submitting.value = false }
 }
 
-const { printReceipt: btPrint } = usePrinter()
-const printReceipt = () => { btPrint(lastOrder.value, sizes.value, toppings.value) }
-const closeReceipt = () => { showReceipt.value = false; lastOrder.value = null }
+const {
+  printCustomerReceipt: btPrintCustomer,
+  printKitchenReceipt: btPrintKitchen,
+} = usePrinter()
+const reprintCustomer = () => { btPrintCustomer(lastOrder.value, sizes.value, toppings.value) }
+const printKitchen = () => {
+  btPrintKitchen(lastOrder.value, sizes.value, toppings.value)
+  kitchenPrinted.value = true
+}
+const closeReceipt = () => {
+  showReceipt.value = false
+  lastOrder.value = null
+  kitchenPrinted.value = false
+}
 
 onMounted(async () => {
   try {

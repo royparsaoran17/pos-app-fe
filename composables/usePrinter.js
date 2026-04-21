@@ -167,7 +167,9 @@ export function usePrinter() {
       window.AndroidPrinter.printCustomerReceipt(payload)
       return true
     }
+    document.body.classList.add('print-customer-only')
     window.print()
+    document.body.classList.remove('print-customer-only')
     return false
   }
 
@@ -180,7 +182,9 @@ export function usePrinter() {
       window.AndroidPrinter.printKitchenReceipt(payload)
       return true
     }
+    document.body.classList.add('print-kitchen-only')
     window.print()
+    document.body.classList.remove('print-kitchen-only')
     return false
   }
 
