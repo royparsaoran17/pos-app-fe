@@ -127,4 +127,35 @@ const logout = () => {
   padding-bottom: 0;
   border-bottom: none;
 }
+
+@media (max-width: 991px) {
+  .topbar-wrapper {
+    margin: -20px -24px 20px;
+    padding: 16px 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .topbar-wrapper {
+    margin: -16px -16px 16px;
+    padding: 12px 16px;
+  }
+  .topbar-wrapper .topbar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .topbar-wrapper .topbar h1 {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 575px) {
+  .topbar-wrapper {
+    margin: -12px -12px 12px;
+    padding: 10px 12px;
+  }
+  .topbar-wrapper .topbar h1 {
+    font-size: 16px;
+  }
+}
 </style>

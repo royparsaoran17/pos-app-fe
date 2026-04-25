@@ -993,12 +993,225 @@ a, button, input, .btn {
 }
 
 /* Responsive */
+@media (max-width: 1199px) {
+  .order-card {
+    padding: 20px;
+  }
+  .topping-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+  }
+}
+
+@media (max-width: 991px) {
+  .main-content {
+    padding: 20px 24px;
+  }
+  .order-card {
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .size-btn {
+    padding: 16px 12px;
+  }
+  .size-btn .size-name {
+    font-size: 16px;
+  }
+  .size-btn .size-price {
+    font-size: 14px;
+  }
+  .topping-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+  .topping-card-body {
+    padding: 12px 10px 6px;
+  }
+  .topping-name {
+    font-size: 14px;
+  }
+  .bumbu-option {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  .additional-chip {
+    padding: 10px 14px;
+    min-width: 90px;
+    font-size: 13px;
+  }
+  .payment-btn {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+}
+
 @media (max-width: 768px) {
   .sidebar {
     display: none;
   }
   .main-content {
-    margin-left: 0;
+    margin-left: 0 !important;
     padding: 16px;
+  }
+  .order-card {
+    padding: 14px;
+    border-radius: var(--radius-sm);
+  }
+  .order-card .card-title {
+    font-size: 15px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+  .size-btn {
+    padding: 14px 10px;
+    border-radius: 12px;
+  }
+  .size-btn .size-name {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .size-btn .size-price {
+    font-size: 13px;
+  }
+  .topping-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px;
+  }
+  .topping-card {
+    border-radius: 12px;
+  }
+  .topping-card-body {
+    padding: 10px 8px 4px;
+  }
+  .topping-name {
+    font-size: 13px;
+  }
+  .topping-gram {
+    font-size: 11px;
+  }
+  .qty-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+  .qty-value {
+    font-size: 16px;
+  }
+  .bumbu-option {
+    padding: 9px 14px;
+    font-size: 13px;
+    border-radius: 20px;
+  }
+  .additional-chip {
+    padding: 10px 12px;
+    min-width: 84px;
+    font-size: 12px;
+  }
+  .additional-chip .additional-name {
+    font-size: 13px;
+  }
+  .additional-chip .additional-price {
+    font-size: 11px;
+  }
+  .spicy-btn {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  .payment-btn {
+    padding: 12px 14px;
+    font-size: 13px;
+    border-radius: 10px;
+  }
+  .order-summary-item {
+    padding: 12px;
+  }
+  .order-summary-item .item-number {
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+  }
+  .promo-suggest-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+}
+
+@media (max-width: 575px) {
+  .main-content {
+    padding: 12px;
+  }
+  .order-card {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  .size-btn {
+    padding: 12px 8px;
+  }
+  .size-btn .size-name {
+    font-size: 14px;
+  }
+  .size-btn .size-price {
+    font-size: 12px;
+  }
+  .topping-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .topping-card-body {
+    padding: 8px 6px 2px;
+  }
+  .topping-name {
+    font-size: 12px;
+  }
+  .topping-qty-controls {
+    padding: 4px 6px 8px;
+    gap: 6px;
+  }
+  .qty-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 13px;
+    border-width: 1.5px;
+  }
+  .qty-value {
+    font-size: 15px;
+    min-width: 20px;
+  }
+  .bumbu-option {
+    padding: 8px 12px;
+    font-size: 12px;
+    margin: 2px;
+  }
+  .additional-chip {
+    padding: 8px 10px;
+    min-width: 76px;
+  }
+  .payment-btn {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .spicy-btn {
+    padding: 6px 10px;
+    font-size: 13px;
+    min-width: 36px;
+  }
+  .order-summary-item {
+    padding: 10px;
+  }
+  .remove-item-btn {
+    top: 8px;
+    right: 8px;
+    font-size: 14px;
+  }
+  .modal-dialog {
+    margin: 0.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .topping-grid {
+    grid-template-columns: 1fr;
+  }
+  .size-btn .size-name {
+    font-size: 13px;
   }
 }
