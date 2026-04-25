@@ -107,12 +107,23 @@
               <label class="fw-600 mb-2 d-block" style="font-size:16px">
                 Level Pedas: <span class="text-danger fw-700" style="font-size:20px">{{ currentItem.spicy_level }}</span>
                 <span class="ms-2">
-                  <span v-for="n in Math.floor(currentItem.spicy_level)" :key="n">🌶️</span>
+                  <span v-for="n in currentItem.spicy_level" :key="n">🌶️</span>
                 </span>
               </label>
-              <input v-model.number="currentItem.spicy_level" type="range" class="spicy-slider" min="0.5" max="5" step="0.5" />
+              <div class="d-flex flex-wrap gap-2">
+                <button
+                  v-for="level in [0, 1, 2, 3, 4, 5]"
+                  :key="level"
+                  type="button"
+                  class="spicy-btn"
+                  :class="{ selected: currentItem.spicy_level === level }"
+                  @click="currentItem.spicy_level = level"
+                >
+                  {{ level }}
+                </button>
+              </div>
               <div class="d-flex justify-content-between fz-13 text-muted mt-2">
-                <span>0.5 (Ringan)</span>
+                <span>0 (Tidak Pedas)</span>
                 <span>5 (Sangat Pedas)</span>
               </div>
             </div>
