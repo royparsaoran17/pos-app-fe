@@ -107,12 +107,13 @@
               <label class="fw-600 mb-2 d-block" style="font-size:16px">
                 Level Pedas: <span class="text-danger fw-700" style="font-size:20px">{{ currentItem.spicy_level }}</span>
                 <span class="ms-2">
-                  <span v-for="n in currentItem.spicy_level" :key="n">🌶️</span>
+                  <span v-for="n in Math.floor(currentItem.spicy_level)" :key="n">🌶️</span>
+                  <span v-if="currentItem.spicy_level % 1 !== 0">🌶️½</span>
                 </span>
               </label>
               <div class="d-flex flex-wrap gap-2">
                 <button
-                  v-for="level in [0, 1, 2, 3, 4, 5]"
+                  v-for="level in [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]"
                   :key="level"
                   type="button"
                   class="spicy-btn"
@@ -465,8 +466,8 @@ const isCurrentItemValid = computed(() => {
   if (!currentItem.value.size) return false
   // Drinks only need a size selected
   if (!isCurrentSizeFood.value) return true
-  // Food needs bumbu + spicy
-  return currentItem.value.bumbu.length > 0 && currentItem.value.spicy_level
+  // Food needs bumbu + spicy (0 is a valid "Tidak Pedas" choice)
+  return currentItem.value.bumbu.length > 0 && currentItem.value.spicy_level != null
 })
 
 const toggleBumbu = (name) => {

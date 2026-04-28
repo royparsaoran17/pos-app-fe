@@ -2,7 +2,7 @@
   "name": "Oh My Tongue - Sistem Kasir",
   "short_name": "OMT POS",
   "display": "standalone",
-  "orientation": "landscape",
+  "orientation": "any",
   "start_url": "/",
   "theme_color": "#e4412e",
   "background_color": "#ffffff",
