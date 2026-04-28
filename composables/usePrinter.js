@@ -1,6 +1,27 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { formatRupiah, formatDate } from '~/utils/format'
 
+// Cached logo base64 — loaded once and reused across prints
+let logoBase64Cache = null
+const loadLogoBase64 = async () => {
+  if (logoBase64Cache !== null) return logoBase64Cache
+  try {
+    const res = await fetch('/logo.png')
+    const blob = await res.blob()
+    logoBase64Cache = await new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => resolve(reader.result)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+    return logoBase64Cache
+  } catch (err) {
+    console.error('Failed to load logo for receipt:', err)
+    logoBase64Cache = ''
+    return ''
+  }
+}
+
 /**
  * Composable for printing receipts.
  * Detects if running inside Android WebView app (with Bluetooth printer)
@@ -31,6 +52,8 @@ export function usePrinter() {
     checkStatus()
     window.addEventListener('printer-connected', onPrinterConnected)
     window.addEventListener('printer-error', onPrinterError)
+    // Eagerly load the logo so it's cached by the time the user prints
+    loadLogoBase64()
   })
 
   onUnmounted(() => {
@@ -81,6 +104,7 @@ export function usePrinter() {
     }
 
     return JSON.stringify({
+      logoBase64: logoBase64Cache || '',
       storeName: order.store?.name || 'Oh My Tongue',
       storeAddress: order.store?.address || '',
       storePhone: order.store?.phone || '',
@@ -133,8 +157,9 @@ export function usePrinter() {
    *
    * Uses Android Bluetooth if available, falls back to browser window.print().
    */
-  const printReceipt = (order, sizes, toppings) => {
+  const printReceipt = async (order, sizes, toppings) => {
     if (window.AndroidPrinter?.isConnected()) {
+      await loadLogoBase64()
       const payload = buildPrintPayload(order, sizes, toppings)
       // Print customer receipt first
       window.AndroidPrinter.printCustomerReceipt(payload)
@@ -161,8 +186,9 @@ export function usePrinter() {
   /**
    * Print only customer receipt.
    */
-  const printCustomerReceipt = (order, sizes, toppings) => {
+  const printCustomerReceipt = async (order, sizes, toppings) => {
     if (window.AndroidPrinter?.isConnected()) {
+      await loadLogoBase64()
       const payload = buildPrintPayload(order, sizes, toppings)
       window.AndroidPrinter.printCustomerReceipt(payload)
       return true
@@ -176,8 +202,9 @@ export function usePrinter() {
   /**
    * Print only kitchen receipt.
    */
-  const printKitchenReceipt = (order, sizes, toppings) => {
+  const printKitchenReceipt = async (order, sizes, toppings) => {
     if (window.AndroidPrinter?.isConnected()) {
+      await loadLogoBase64()
       const payload = buildPrintPayload(order, sizes, toppings)
       window.AndroidPrinter.printKitchenReceipt(payload)
       return true

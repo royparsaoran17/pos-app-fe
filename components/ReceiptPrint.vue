@@ -81,7 +81,7 @@
 
       <!-- Footer with social media CTA -->
       <div style="text-align: center; font-size: 8px; margin-top: 5px; line-height: 1.4">
-        <div>Terima kasih atas pembelian Anda!</div>
+        <div>Terimakasih atas pembeliannya!</div>
         <div v-if="order?.store?.instagram || order?.store?.tiktok" style="margin-top: 4px; border-top: 1px dashed #000; padding-top: 4px">
           <div style="font-weight: bold; font-size: 9px">Follow kami yuk!</div>
           <div v-if="order?.store?.instagram" style="margin-top: 1px">
