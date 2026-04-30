@@ -1,8 +1,13 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import QRCode from 'qrcode'
 import { formatRupiah, formatDate } from '~/utils/format'
 
-// Cached logo base64 — loaded once and reused across prints
+const FEEDBACK_URL = 'http://linktr.ee/ohmytongue'
+
+// Module-level cache — loaded once, shared across all composable instances
 let logoBase64Cache = null
+let qrBase64Cache = null
+
 const loadLogoBase64 = async () => {
   if (logoBase64Cache !== null) return logoBase64Cache
   try {
@@ -18,6 +23,21 @@ const loadLogoBase64 = async () => {
   } catch (err) {
     console.error('Failed to load logo for receipt:', err)
     logoBase64Cache = ''
+    return ''
+  }
+}
+
+const loadQrBase64 = async () => {
+  if (qrBase64Cache !== null) return qrBase64Cache
+  try {
+    qrBase64Cache = await QRCode.toDataURL(FEEDBACK_URL, {
+      width: 200, margin: 1,
+      color: { dark: '#000000', light: '#ffffff' },
+    })
+    return qrBase64Cache
+  } catch (err) {
+    console.error('Failed to generate QR code:', err)
+    qrBase64Cache = ''
     return ''
   }
 }
@@ -48,12 +68,17 @@ export function usePrinter() {
     checkStatus()
   }
 
-  onMounted(() => {
+  const logoBase64 = ref('')
+  const qrDataUrl = ref('')
+
+  onMounted(async () => {
     checkStatus()
     window.addEventListener('printer-connected', onPrinterConnected)
     window.addEventListener('printer-error', onPrinterError)
-    // Eagerly load the logo so it's cached by the time the user prints
-    loadLogoBase64()
+    // Eagerly load logo + QR so they're ready before the user prints
+    const [logo, qr] = await Promise.all([loadLogoBase64(), loadQrBase64()])
+    logoBase64.value = logo
+    qrDataUrl.value = qr
   })
 
   onUnmounted(() => {
@@ -142,7 +167,7 @@ export function usePrinter() {
       tiktok: order.store?.tiktok || '',
       notes: order.notes || '',
       createdAt: formatDate(order.created_at),
-      feedbackQrUrl: 'http://linktr.ee/ohmytongue',
+      feedbackQrUrl: qrBase64Cache || FEEDBACK_URL,
       feedbackQrMessage: 'Berikan kami saran dengan scan QR diatas',
     })
   }
@@ -239,6 +264,8 @@ export function usePrinter() {
     isAndroidApp,
     printerConnected,
     printerName,
+    logoBase64,
+    qrDataUrl,
     printReceipt,
     printCustomerReceipt,
     printKitchenReceipt,

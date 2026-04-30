@@ -112,16 +112,16 @@
                 </span>
               </label>
               <div class="d-flex flex-wrap gap-2">
-                <button
+                <span
                   v-for="level in [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]"
                   :key="level"
-                  type="button"
-                  class="spicy-btn"
+                  class="bumbu-option"
                   :class="{ selected: currentItem.spicy_level === level }"
                   @click="currentItem.spicy_level = level"
                 >
+                  <i v-if="currentItem.spicy_level === level" class="bi bi-check-circle-fill me-1"></i>
                   {{ level }}
-                </button>
+                </span>
               </div>
               <div class="d-flex justify-content-between fz-13 text-muted mt-2">
                 <span>0 (Tidak Pedas)</span>
@@ -342,7 +342,7 @@
     <!-- Auto-print area (both receipts, printed separately with delay) -->
     <div v-if="lastOrder" class="print-only-area">
       <div class="receipt-customer-area">
-        <ReceiptPrint :order="lastOrder" :toppings="toppings" :sizes="sizes" />
+        <ReceiptPrint :order="lastOrder" :toppings="toppings" :sizes="sizes" :logo-base64="printerLogoBase64" :qr-data-url="printerQrDataUrl" />
       </div>
       <div class="page-break"></div>
       <div class="receipt-kitchen-area">
@@ -802,6 +802,8 @@ const submitOrder = async () => {
 const {
   printCustomerReceipt: btPrintCustomer,
   printKitchenReceipt: btPrintKitchen,
+  logoBase64: printerLogoBase64,
+  qrDataUrl: printerQrDataUrl,
 } = usePrinter()
 const reprintCustomer = () => { btPrintCustomer(lastOrder.value, sizes.value, toppings.value) }
 const printKitchen = () => {

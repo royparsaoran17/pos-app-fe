@@ -3,7 +3,7 @@
     <div class="receipt">
       <!-- Header with store info -->
       <div class="receipt-header">
-        <img src="/logo.png" alt="OMT" style="width:36px;height:36px;object-fit:contain;margin-bottom:2px" />
+        <img :src="logoBase64 || '/logo.png'" alt="OMT" style="width:36px;height:36px;object-fit:contain;margin-bottom:2px" />
         <div style="font-size: 12px; font-weight: bold">{{ order?.store?.name || 'Oh My Tongue' }}</div>
         <div v-if="order?.store?.address" style="font-size: 8px; margin-top: 2px; line-height: 1.3">{{ order.store.address }}</div>
         <div v-if="order?.store?.phone" style="font-size: 8px">Tel: {{ order.store.phone }}</div>
@@ -108,28 +108,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import QRCode from 'qrcode'
 import { formatRupiah, formatDate } from '~/utils/format'
 
 const props = defineProps({
   order: Object,
   toppings: Array,
   sizes: Array,
-})
-
-const qrDataUrl = ref('')
-
-onMounted(async () => {
-  try {
-    qrDataUrl.value = await QRCode.toDataURL('http://linktr.ee/ohmytongue', {
-      width: 200,
-      margin: 1,
-      color: { dark: '#000000', light: '#ffffff' },
-    })
-  } catch (err) {
-    console.error('Failed to generate QR code:', err)
-  }
+  logoBase64: { type: String, default: '' },
+  qrDataUrl: { type: String, default: '' },
 })
 
 const getSizeLabel = (key) => {
