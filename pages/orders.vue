@@ -91,6 +91,9 @@
               <button class="btn btn-sm btn-outline-success me-1" @click="printOrder(order)">
                 <i class="bi bi-printer"></i>
               </button>
+              <button v-if="store.isSuperAdmin" class="btn btn-sm btn-outline-danger" @click="confirmDelete(order)" title="Hapus pesanan">
+                <i class="bi bi-trash"></i>
+              </button>
             </td>
           </tr>
         </tbody>
@@ -243,6 +246,28 @@
       </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div v-if="deletingOrder" class="modal d-block" style="background: rgba(0,0,0,0.5)">
+      <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-700 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Hapus Pesanan</h5>
+            <button class="btn-close" :disabled="deleting" @click="deletingOrder = null"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-2">Yakin hapus pesanan <strong>{{ deletingOrder.order_number }}</strong>?</p>
+            <p class="fz-12 text-muted mb-0">Tindakan ini tidak dapat dibatalkan.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-sm btn-secondary" :disabled="deleting" @click="deletingOrder = null">Batal</button>
+            <button class="btn btn-sm btn-danger" :disabled="deleting" @click="doDelete">
+              <i class="bi bi-trash me-1"></i> {{ deleting ? 'Menghapus...' : 'Hapus' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Print area (both receipts, printed separately with delay) -->
     <div v-if="printingOrder" class="print-only-area">
       <div class="receipt-customer-area">
@@ -279,10 +304,12 @@
 <script setup>
 import { useMainStore } from '~/stores'
 import { formatRupiah, formatDate, todayJakarta } from '~/utils/format'
+import { useToast } from '~/composables/useToast'
 
 definePageMeta({ layout: 'dashboard', middleware: 'auth' })
 
 const store = useMainStore()
+const toast = useToast()
 
 const orders = ref([])
 const loading = ref(false)
@@ -298,6 +325,8 @@ const printingOrder = ref(null)
 const editingOrder = ref(null)
 const editForm = ref({ payment_method: '', notes: '', items: [] })
 const savingEdit = ref(false)
+const deletingOrder = ref(null)
+const deleting = ref(false)
 const editSizes = ref([])
 const editToppings = ref([])
 const editBumbuList = ref([])
@@ -416,6 +445,26 @@ const toggleEditTopping = (item, id) => {
 
 const addEditItem = () => {
   editForm.value.items.push({ size: editSizes.value[0]?.key || '', spicy_level: 2, bumbu: [], topping_ids: [] })
+}
+
+const confirmDelete = (order) => {
+  if (!store.isSuperAdmin) return
+  deletingOrder.value = order
+}
+
+const doDelete = async () => {
+  if (!deletingOrder.value) return
+  deleting.value = true
+  try {
+    await store.deleteOrder(deletingOrder.value.id)
+    toast.success(`Pesanan ${deletingOrder.value.order_number} berhasil dihapus`)
+    deletingOrder.value = null
+    fetchData()
+  } catch (e) {
+    toast.error(e.response?.data?.message || 'Gagal menghapus pesanan')
+  } finally {
+    deleting.value = false
+  }
 }
 
 const saveEdit = async () => {
