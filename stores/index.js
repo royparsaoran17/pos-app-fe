@@ -90,6 +90,7 @@ export const useMainStore = defineStore('main', {
     async fetchReports(params) { return (await http.get('/dashboard/reports', { params })).data },
     async fetchAttendance(params) { return (await http.get('/dashboard/attendance', { params })).data },
     async fetchDailyRecap(params) { return (await http.get('/dashboard/daily-recap', { params })).data },
+    async fetchStaffRecap(params) { return (await http.get('/dashboard/staff-recap', { params })).data },
     async fetchToppingStock(params) { return (await http.get('/dashboard/topping-stock', { params })).data },
     async fetchAnalytics(params) { return (await http.get('/dashboard/analytics', { params })).data },
 

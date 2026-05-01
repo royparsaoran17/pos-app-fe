@@ -75,9 +75,11 @@
             <i v-if="!minimized" class="bi" :class="isOpen('keu-staff') ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
           </div>
           <div v-if="!minimized" class="sidebar-items" :class="{ collapsed: !isOpen('keu-staff') }">
+            <NuxtLink to="/staff-recap" class="nav-item" title="Rekap Hari Ini"><i class="bi bi-calendar-check"></i> <span class="nav-text">Rekap Hari Ini</span></NuxtLink>
             <NuxtLink to="/staff-expenses" class="nav-item" title="Pengeluaran"><i class="bi bi-cash-stack"></i> <span class="nav-text">Pengeluaran</span></NuxtLink>
           </div>
           <div v-else class="sidebar-items-mini">
+            <NuxtLink to="/staff-recap" class="nav-item" title="Rekap Hari Ini"><i class="bi bi-calendar-check"></i></NuxtLink>
             <NuxtLink to="/staff-expenses" class="nav-item" title="Pengeluaran"><i class="bi bi-cash-stack"></i></NuxtLink>
           </div>
         </div>

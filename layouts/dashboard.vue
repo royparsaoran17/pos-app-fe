@@ -65,6 +65,7 @@ const pageTitle = computed(() => {
     '/quality-check': 'Quality Check',
     '/stok-opname': 'Stok Opname',
     '/staff-expenses': 'Pengeluaran',
+    '/staff-recap': 'Rekap Hari Ini',
     '/shift': 'Shift',
     '/members': 'Member',
     '/packaging': 'Packaging',
