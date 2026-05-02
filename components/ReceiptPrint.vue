@@ -123,9 +123,19 @@ const getSizeLabel = (key) => {
   return found?.label || key
 }
 
+const resolveToppingName = (entry) => {
+  if (entry?.topping?.name) return entry.topping.name
+  const id = entry?.topping_id ?? entry?.topping?.id
+  if (id != null && props.toppings?.length) {
+    const found = props.toppings.find((m) => m.id === id)
+    if (found?.name) return found.name
+  }
+  return '-'
+}
+
 const getToppingNames = (item) => {
   if (!item.toppings || item.toppings.length === 0) return '-'
-  return item.toppings.map((t) => t.topping?.name || '-').join(', ')
+  return item.toppings.map(resolveToppingName).join(', ')
 }
 
 const isFood = (item) => {

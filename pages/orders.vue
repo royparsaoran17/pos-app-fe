@@ -271,11 +271,11 @@
     <!-- Print area (both receipts, printed separately with delay) -->
     <div v-if="printingOrder" class="print-only-area">
       <div class="receipt-customer-area">
-        <ReceiptPrint :order="printingOrder" :sizes="editSizes" />
+        <ReceiptPrint :order="printingOrder" :sizes="editSizes" :toppings="editToppings" />
       </div>
       <div class="page-break"></div>
       <div class="receipt-kitchen-area">
-        <ReceiptKitchen :order="printingOrder" :sizes="editSizes" />
+        <ReceiptKitchen :order="printingOrder" :sizes="editSizes" :toppings="editToppings" />
       </div>
     </div>
 
@@ -283,17 +283,30 @@
     <div v-if="printingOrder" class="modal d-block no-print" style="background: rgba(0,0,0,0.5)">
       <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content">
-          <div class="modal-body text-center py-4">
-            <p class="fw-600">Cetak struk pesanan {{ printingOrder.order_number }}?</p>
-            <p class="fz-13 text-muted">Struk Customer + Struk Dapur</p>
+          <div class="modal-header py-2">
+            <h6 class="modal-title fw-700 fz-14">Cetak Struk</h6>
+            <button class="btn-close" @click="printingOrder = null"></button>
           </div>
-          <div class="modal-footer justify-content-center">
-            <button class="btn btn-primary btn-sm" @click="doPrint">
-              <i class="bi bi-printer me-1"></i> Cetak
-            </button>
-            <button class="btn btn-outline-secondary btn-sm" @click="printingOrder = null">
-              Tutup
-            </button>
+          <div class="modal-body py-3">
+            <p class="fw-600 mb-1 fz-14">Pesanan {{ printingOrder.order_number }}</p>
+            <p class="fz-12 text-muted mb-3">Pilih jenis struk yang ingin dicetak:</p>
+            <div class="d-grid gap-2">
+              <button class="btn btn-primary btn-sm d-flex align-items-center justify-content-center gap-2" @click="doPrintCustomer">
+                <i class="bi bi-receipt"></i>
+                <span>Struk Customer</span>
+              </button>
+              <button class="btn btn-warning btn-sm d-flex align-items-center justify-content-center gap-2 text-dark" @click="doPrintKitchen">
+                <i class="bi bi-fire"></i>
+                <span>Struk Dapur</span>
+              </button>
+              <button class="btn btn-outline-success btn-sm d-flex align-items-center justify-content-center gap-2" @click="doPrintBoth">
+                <i class="bi bi-printer"></i>
+                <span>Cetak Keduanya</span>
+              </button>
+            </div>
+          </div>
+          <div class="modal-footer py-2">
+            <button class="btn btn-outline-secondary btn-sm" @click="printingOrder = null">Tutup</button>
           </div>
         </div>
       </div>
@@ -383,21 +396,38 @@ const viewOrder = (order) => {
 }
 
 const printOrder = async (order) => {
-  if (!editSizes.value.length) {
-    try {
-      const sRes = await store.fetchSizes()
-      editSizes.value = sRes.content
-    } catch (e) { console.error(e) }
-  }
+  try {
+    const tasks = []
+    if (!editSizes.value.length) tasks.push(store.fetchSizes().then(r => { editSizes.value = r.content }))
+    if (!editToppings.value.length) tasks.push(store.fetchToppings().then(r => { editToppings.value = r.content }))
+    if (tasks.length) await Promise.all(tasks)
+  } catch (e) { console.error(e) }
   printingOrder.value = order
 }
 
-const { printReceipt: btPrint, isAndroidApp } = usePrinter()
+const {
+  printReceipt: btPrintBoth,
+  printCustomerReceipt: btPrintCustomer,
+  printKitchenReceipt: btPrintKitchen,
+  isAndroidApp,
+} = usePrinter()
 
-const doPrint = () => {
-  if (printingOrder.value) {
-    btPrint(printingOrder.value, editSizes.value, [])
-  }
+const doPrintCustomer = () => {
+  if (!printingOrder.value) return
+  btPrintCustomer(printingOrder.value, editSizes.value, editToppings.value)
+  printingOrder.value = null
+}
+
+const doPrintKitchen = () => {
+  if (!printingOrder.value) return
+  btPrintKitchen(printingOrder.value, editSizes.value, editToppings.value)
+  printingOrder.value = null
+}
+
+const doPrintBoth = () => {
+  if (!printingOrder.value) return
+  btPrintBoth(printingOrder.value, editSizes.value, editToppings.value)
+  printingOrder.value = null
 }
 
 const getSizeLabel = (key) => {

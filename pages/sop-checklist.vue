@@ -37,10 +37,10 @@
           <span class="ms-auto badge bg-primary">{{ sectionProgress('OPENING') }}</span>
         </div>
         <div class="sop-section-body">
-          <div v-for="(item, idx) in checklist.sections?.OPENING || []" :key="'o-'+idx" class="sop-item" :class="{ 'sop-item-checked': item.is_checked }">
+          <div v-for="(item, idx) in checklist.sections?.OPENING || []" :key="'o-'+item.task_id" class="sop-item" :class="{ 'sop-item-checked': item.is_checked }">
             <div class="form-check">
-              <input :id="'op-'+idx" v-model="item.is_checked" type="checkbox" class="form-check-input" @change="onToggle(item)">
-              <label :for="'op-'+idx" class="form-check-label" :class="{ 'text-decoration-line-through text-muted': item.is_checked }">
+              <input :id="'op-'+item.task_id" v-model="item.is_checked" type="checkbox" class="form-check-input" @change="onToggle(item)">
+              <label :for="'op-'+item.task_id" class="form-check-label" :class="{ 'text-decoration-line-through text-muted': item.is_checked }">
                 <span class="fz-13 text-muted me-2">{{ idx + 1 }}.</span>
                 {{ item.description }}
               </label>
@@ -60,10 +60,10 @@
           <span class="ms-auto badge bg-warning text-dark">{{ sectionProgress('OPERATIONAL') }}</span>
         </div>
         <div class="sop-section-body">
-          <div v-for="(item, idx) in checklist.sections?.OPERATIONAL || []" :key="'op2-'+idx" class="sop-item" :class="{ 'sop-item-checked': item.is_checked }">
+          <div v-for="(item, idx) in checklist.sections?.OPERATIONAL || []" :key="'op2-'+item.task_id" class="sop-item" :class="{ 'sop-item-checked': item.is_checked }">
             <div class="form-check">
-              <input :id="'oper-'+idx" v-model="item.is_checked" type="checkbox" class="form-check-input" @change="onToggle(item)">
-              <label :for="'oper-'+idx" class="form-check-label" :class="{ 'text-decoration-line-through text-muted': item.is_checked }">
+              <input :id="'oper-'+item.task_id" v-model="item.is_checked" type="checkbox" class="form-check-input" @change="onToggle(item)">
+              <label :for="'oper-'+item.task_id" class="form-check-label" :class="{ 'text-decoration-line-through text-muted': item.is_checked }">
                 <span class="fz-13 text-muted me-2">{{ idx + 1 }}.</span>
                 {{ item.description }}
               </label>
@@ -83,10 +83,10 @@
           <span class="ms-auto badge bg-danger">{{ sectionProgress('CLOSING') }}</span>
         </div>
         <div class="sop-section-body">
-          <div v-for="(item, idx) in checklist.sections?.CLOSING || []" :key="'cl-'+idx" class="sop-item" :class="{ 'sop-item-checked': item.is_checked }">
+          <div v-for="(item, idx) in checklist.sections?.CLOSING || []" :key="'cl-'+item.task_id" class="sop-item" :class="{ 'sop-item-checked': item.is_checked }">
             <div class="form-check">
-              <input :id="'cl-'+idx" v-model="item.is_checked" type="checkbox" class="form-check-input" @change="onToggle(item)">
-              <label :for="'cl-'+idx" class="form-check-label" :class="{ 'text-decoration-line-through text-muted': item.is_checked }">
+              <input :id="'cl-'+item.task_id" v-model="item.is_checked" type="checkbox" class="form-check-input" @change="onToggle(item)">
+              <label :for="'cl-'+item.task_id" class="form-check-label" :class="{ 'text-decoration-line-through text-muted': item.is_checked }">
                 <span class="fz-13 text-muted me-2">{{ idx + 1 }}.</span>
                 {{ item.description }}
               </label>
@@ -100,8 +100,14 @@
     </template>
 
     <!-- Save toast -->
-    <div v-if="showSaved" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
-      <div class="toast show bg-success text-white">
+    <div v-if="showSaved || saving || saveError" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+      <div v-if="saving" class="toast show bg-secondary text-white">
+        <div class="toast-body fz-13"><span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...</div>
+      </div>
+      <div v-else-if="saveError" class="toast show bg-danger text-white">
+        <div class="toast-body fz-13"><i class="bi bi-exclamation-circle me-1"></i> {{ saveError }}</div>
+      </div>
+      <div v-else-if="showSaved" class="toast show bg-success text-white">
         <div class="toast-body fz-13"><i class="bi bi-check-circle me-1"></i> Tersimpan!</div>
       </div>
     </div>
@@ -117,6 +123,8 @@ const store = useMainStore()
 const loading = ref(false)
 const selectedDate = ref(todayJakarta())
 const showSaved = ref(false)
+const saving = ref(false)
+const saveError = ref('')
 const checklist = ref({
   total_tasks: 0,
   completed_tasks: 0,
@@ -126,6 +134,20 @@ const checklist = ref({
 
 let saveTimer = null
 
+const allItemsFlat = () => [
+  ...(checklist.value.sections?.OPENING || []),
+  ...(checklist.value.sections?.OPERATIONAL || []),
+  ...(checklist.value.sections?.CLOSING || []),
+]
+
+const recalcProgress = () => {
+  const all = allItemsFlat()
+  const done = all.filter((i) => i.is_checked).length
+  checklist.value.completed_tasks = done
+  checklist.value.total_tasks = all.length
+  checklist.value.progress = all.length > 0 ? Math.round((done / all.length) * 100) : 0
+}
+
 const loadChecklist = async () => {
   loading.value = true
   try {
@@ -133,37 +155,66 @@ const loadChecklist = async () => {
     checklist.value = res.content
   } catch (err) {
     console.error(err)
+    saveError.value = 'Gagal memuat checklist'
+    setTimeout(() => { saveError.value = '' }, 2500)
   } finally {
     loading.value = false
   }
 }
 
 const onToggle = (item) => {
-  // Auto-save after toggling
+  // Optimistic local feedback
+  if (item.is_checked && !item.checked_at) {
+    item.checked_at = new Date().toISOString()
+  } else if (!item.is_checked) {
+    item.checked_at = null
+  }
+  recalcProgress()
+
+  // Debounced save
   clearTimeout(saveTimer)
   saveTimer = setTimeout(() => saveChecklist(), 500)
 }
 
 const saveChecklist = async () => {
+  saving.value = true
+  saveError.value = ''
   try {
-    const allItems = [
-      ...(checklist.value.sections?.OPENING || []),
-      ...(checklist.value.sections?.OPERATIONAL || []),
-      ...(checklist.value.sections?.CLOSING || []),
-    ]
+    const items = allItemsFlat().map((i) => ({
+      task_id: i.task_id,
+      is_checked: i.is_checked,
+      notes: i.notes || null,
+    }))
     const res = await store.saveSopChecklist({
       shift_date: selectedDate.value,
-      items: allItems.map((i) => ({
-        task_id: i.task_id,
-        is_checked: i.is_checked,
-        notes: i.notes || null,
-      })),
+      items,
     })
-    checklist.value = res.content
+    // Non-destructive merge: keep user's local is_checked (they may have toggled
+    // again during the save round-trip) and only refresh server-authoritative
+    // fields like checked_at.
+    const sections = res?.content?.sections
+    if (sections) {
+      for (const cat of ['OPENING', 'OPERATIONAL', 'CLOSING']) {
+        const serverItems = sections[cat] || []
+        const serverByTaskId = new Map(serverItems.map((s) => [s.task_id, s]))
+        const localItems = checklist.value.sections?.[cat] || []
+        for (const local of localItems) {
+          const server = serverByTaskId.get(local.task_id)
+          if (server && local.is_checked === server.is_checked) {
+            local.checked_at = server.checked_at
+          }
+        }
+      }
+    }
+    recalcProgress()
     showSaved.value = true
     setTimeout(() => { showSaved.value = false }, 1500)
   } catch (err) {
     console.error(err)
+    saveError.value = err.response?.data?.message || 'Gagal menyimpan'
+    setTimeout(() => { saveError.value = '' }, 3000)
+  } finally {
+    saving.value = false
   }
 }
 

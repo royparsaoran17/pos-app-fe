@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useToast } from "~/composables/useToast";
 
-const getApiBaseUrl = () => {https://omt-api.gct.my.id
+const getApiBaseUrl = () => {
   if (typeof window !== "undefined" && window.__APP_CONFIG__?.apiBase) {
     return window.__APP_CONFIG__.apiBase;
   }

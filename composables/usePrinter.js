@@ -97,6 +97,16 @@ export function usePrinter() {
 
     const getSizeData = (key) => sizes?.find(s => s.key === key)
 
+    const resolveToppingName = (entry) => {
+      if (entry?.topping?.name) return entry.topping.name
+      const id = entry?.topping_id ?? entry?.topping?.id
+      if (id != null && toppings?.length) {
+        const found = toppings.find((m) => m.id === id)
+        if (found?.name) return found.name
+      }
+      return '-'
+    }
+
     const isFood = (item) => getSizeData(item.menu_size_key)?.category !== 'DRINK'
 
     const calcGram = (item, toppingEntry) => {
@@ -146,7 +156,7 @@ export function usePrinter() {
         isDrink: !isFood(item),
         toppings: isFood(item)
           ? (item.toppings || []).map(t => ({
-              name: t.topping?.name || '-',
+              name: resolveToppingName(t),
               gram: calcGram(item, t),
             }))
           : [],

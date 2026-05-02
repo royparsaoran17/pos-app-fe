@@ -38,7 +38,7 @@
           <div style="font-weight: bold; font-size: 9px; margin-top: 2px">Topping:</div>
           <div v-if="!item.toppings || item.toppings.length === 0" style="padding-left: 4px; font-size: 9px">-</div>
           <div v-for="t in item.toppings" :key="t.id" style="padding-left: 4px; font-size: 9px; display: flex; justify-content: space-between; align-items: center">
-            <span>&bull; {{ t.topping?.name }}</span>
+            <span>&bull; {{ resolveToppingName(t) }}</span>
             <span v-if="calcGram(item, t)" style="font-weight: bold; font-size: 10px; border: 1px solid #000; padding: 0 3px; border-radius: 2px; min-width: 36px; text-align: center">
               {{ calcGram(item, t) }}g
             </span>
@@ -88,7 +88,18 @@ import { formatDate } from '~/utils/format'
 const props = defineProps({
   order: Object,
   sizes: Array,
+  toppings: { type: Array, default: () => [] },
 })
+
+const resolveToppingName = (entry) => {
+  if (entry?.topping?.name) return entry.topping.name
+  const id = entry?.topping_id ?? entry?.topping?.id
+  if (id != null && props.toppings?.length) {
+    const found = props.toppings.find((m) => m.id === id)
+    if (found?.name) return found.name
+  }
+  return '-'
+}
 
 const getSizeLabel = (key) => {
   const found = props.sizes?.find(s => s.key === key)
