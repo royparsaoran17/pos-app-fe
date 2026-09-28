@@ -17,13 +17,18 @@
             <option value="GOJEK">Gojek</option>
           </select>
         </div>
-        <div class="col-md-2">
-          <label class="form-label fz-13 fw-600">Dari Tanggal</label>
-          <input v-model="dateFrom" type="date" class="form-control fz-13" @change="fetchData" />
-        </div>
-        <div class="col-md-2">
-          <label class="form-label fz-13 fw-600">Sampai Tanggal</label>
-          <input v-model="dateTo" type="date" class="form-control fz-13" @change="fetchData" />
+        <div class="col-md-4">
+          <label class="form-label fz-13 fw-600">Tanggal</label>
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-outline-primary" @click="changeDate(-1)" title="Hari sebelumnya">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            <input v-model="selectedDate" type="date" class="form-control fz-13" style="width: 160px" @change="onDateChange" />
+            <button class="btn btn-sm btn-outline-primary" @click="changeDate(1)" title="Hari berikutnya">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+            <span class="fz-12 text-muted text-nowrap">{{ formattedDate }}</span>
+          </div>
         </div>
         <div class="col-md-3 text-end">
           <button class="btn btn-outline-secondary btn-sm" @click="resetFilters">
@@ -336,8 +341,7 @@ const perPage = ref(10)
 const meta = ref({ total: 0, last_page: 1 })
 const search = ref('')
 const filterPayment = ref('')
-const dateFrom = ref(todayJakarta())
-const dateTo = ref(todayJakarta())
+const selectedDate = ref(todayJakarta())
 const selectedOrder = ref(null)
 const printingOrder = ref(null)
 const editingOrder = ref(null)
@@ -360,8 +364,10 @@ const fetchData = async () => {
     }
     if (search.value) params.search = search.value
     if (filterPayment.value) params.payment_method = filterPayment.value
-    if (dateFrom.value) params.date_from = dateFrom.value
-    if (dateTo.value) params.date_to = dateTo.value
+    if (selectedDate.value) {
+      params.date_from = selectedDate.value
+      params.date_to = selectedDate.value
+    }
 
     const result = await store.fetchOrders(params)
     orders.value = result.content
@@ -390,8 +396,29 @@ const goToPage = (p) => {
 const resetFilters = () => {
   search.value = ''
   filterPayment.value = ''
-  dateFrom.value = ''
-  dateTo.value = ''
+  selectedDate.value = todayJakarta()
+  currentPage.value = 1
+  fetchData()
+}
+
+const formattedDate = computed(() => {
+  if (!selectedDate.value) return '-'
+  const d = new Date(selectedDate.value + 'T00:00:00+07:00')
+  return d.toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
+})
+
+const onDateChange = () => {
+  currentPage.value = 1
+  fetchData()
+}
+
+const changeDate = (delta) => {
+  const d = new Date(selectedDate.value + 'T00:00:00+07:00')
+  d.setDate(d.getDate() + delta)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  selectedDate.value = `${y}-${m}-${day}`
   currentPage.value = 1
   fetchData()
 }

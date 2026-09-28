@@ -25,11 +25,12 @@
           <th>Pesanan</th>
           <th>Revenue</th>
           <th>Status</th>
+          <th>Aksi</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-if="loading"><td colspan="11" class="text-center py-4 text-muted">Memuat...</td></tr>
-        <tr v-else-if="rows.length === 0"><td colspan="11" class="text-center py-4 text-muted">Tidak ada data</td></tr>
+        <tr v-if="loading"><td colspan="12" class="text-center py-4 text-muted">Memuat...</td></tr>
+        <tr v-else-if="rows.length === 0"><td colspan="12" class="text-center py-4 text-muted">Tidak ada data</td></tr>
         <tr v-for="(row, idx) in rows" :key="row.id">
           <td>{{ idx + 1 }}</td>
           <td class="fw-600">{{ row.staff?.name }}</td>
@@ -51,6 +52,11 @@
               {{ row.status === 'OPEN' ? 'Buka' : 'Tutup' }}
             </span>
           </td>
+          <td>
+            <button class="btn btn-sm btn-outline-warning" @click="openEdit(row)" title="Edit shift">
+              <i class="bi bi-pencil"></i>
+            </button>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -66,15 +72,77 @@
         </ul>
       </nav>
     </div>
+
+    <!-- Edit Shift Modal -->
+    <div v-if="editingShift" class="modal d-block" style="background: rgba(0,0,0,0.5)">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title fw-700">Edit Shift - {{ editingShift.staff?.name }}</h5>
+            <button class="btn-close" @click="editingShift = null"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fz-13 fw-600">Tanggal Shift</label>
+                <input v-model="editForm.shift_date" type="date" class="form-control form-control-sm" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fz-13 fw-600">Status</label>
+                <select v-model="editForm.status" class="form-select form-select-sm">
+                  <option value="OPEN">Buka</option>
+                  <option value="CLOSED">Tutup</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fz-13 fw-600">Jam Buka</label>
+                <input v-model="editForm.open_time" type="datetime-local" class="form-control form-control-sm" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fz-13 fw-600">Jam Tutup</label>
+                <input v-model="editForm.close_time" type="datetime-local" class="form-control form-control-sm" />
+                <small class="text-muted fz-11">Kosongkan jika shift masih buka</small>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fz-13 fw-600">Kas Awal</label>
+                <input v-model.number="editForm.opening_cash" type="number" min="0" class="form-control form-control-sm" />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fz-13 fw-600">Kas Akhir</label>
+                <input v-model.number="editForm.closing_cash" type="number" min="0" class="form-control form-control-sm" />
+              </div>
+              <div class="col-12">
+                <label class="form-label fz-13 fw-600">Catatan</label>
+                <input v-model="editForm.notes" class="form-control form-control-sm" />
+              </div>
+              <div class="col-12">
+                <div class="alert alert-light border fz-12 mb-0 py-2">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Selisih, total pesanan, dan revenue akan dihitung ulang berdasarkan kas dan waktu shift.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-sm btn-secondary" :disabled="saving" @click="editingShift = null">Batal</button>
+            <button class="btn btn-sm btn-primary" :disabled="saving" @click="saveEdit">
+              {{ saving ? 'Menyimpan...' : 'Simpan Perubahan' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { useMainStore } from '~/stores'
-import { formatRupiah, formatDate } from '~/utils/format'
+import { formatRupiah, formatDate, toJakartaDatetimeLocal, jakartaDatetimeLocalToISO } from '~/utils/format'
+import { useToast } from '~/composables/useToast'
 
 definePageMeta({ layout: 'dashboard', middleware: 'auth' })
 const store = useMainStore()
+const toast = useToast()
 
 const rows = ref([])
 const loading = ref(false)
@@ -84,10 +152,70 @@ const staffList = ref([])
 const selectedStaff = ref('')
 const dateFrom = ref('')
 const dateTo = ref('')
+const editingShift = ref(null)
+const saving = ref(false)
+const editForm = ref({
+  shift_date: '',
+  open_time: '',
+  close_time: '',
+  opening_cash: 0,
+  closing_cash: null,
+  status: 'OPEN',
+  notes: '',
+})
 
 const formatTime = (dt) => {
   if (!dt) return '-'
   return new Date(dt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+}
+
+const toDateInput = (dt) => {
+  if (!dt) return ''
+  const d = new Date(dt)
+  if (isNaN(d.getTime())) return ''
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(d)
+}
+
+const openEdit = (row) => {
+  editingShift.value = row
+  editForm.value = {
+    shift_date: toDateInput(row.shift_date),
+    open_time: toJakartaDatetimeLocal(row.open_time),
+    close_time: toJakartaDatetimeLocal(row.close_time),
+    opening_cash: row.opening_cash ?? 0,
+    closing_cash: row.closing_cash ?? null,
+    status: row.status,
+    notes: row.notes || '',
+  }
+}
+
+const saveEdit = async () => {
+  if (!editingShift.value) return
+  saving.value = true
+  try {
+    const payload = {
+      shift_date: editForm.value.shift_date || undefined,
+      open_time: editForm.value.open_time ? jakartaDatetimeLocalToISO(editForm.value.open_time) : undefined,
+      close_time: editForm.value.close_time ? jakartaDatetimeLocalToISO(editForm.value.close_time) : null,
+      opening_cash: editForm.value.opening_cash ?? 0,
+      closing_cash: editForm.value.closing_cash === '' || editForm.value.closing_cash === null
+        ? null
+        : Number(editForm.value.closing_cash),
+      status: editForm.value.status,
+      notes: editForm.value.notes,
+    }
+    await store.updateShiftAdmin(editingShift.value.id, payload)
+    toast.success('Shift berhasil diperbarui')
+    editingShift.value = null
+    fetchData()
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Gagal menyimpan shift')
+  } finally {
+    saving.value = false
+  }
 }
 
 const fetchData = async () => {

@@ -201,6 +201,7 @@ export const useMainStore = defineStore('main', {
     async closeShift(payload) { return (await http.post('/shifts/close', payload)).data },
     async fetchShiftHistory(params) { return (await http.get('/shifts/history', { params })).data },
     async fetchShiftHistoryAdmin(params) { return (await http.get('/shifts/admin', { params })).data },
+    async updateShiftAdmin(id, payload) { return (await http.put(`/shifts/admin/${id}`, payload)).data },
 
     // Admin - Finance / Kas
     async adminFetchFinance(params) { return (await http.get('/admin/finance', { params })).data },
