@@ -32,12 +32,14 @@
             <NuxtLink to="/quality-check" class="nav-item" title="Quality Check"><i class="bi bi-shield-check"></i> <span class="nav-text">Quality Check</span></NuxtLink>
             <NuxtLink to="/stok-opname" class="nav-item" title="Stok Opname"><i class="bi bi-clipboard-data"></i> <span class="nav-text">Stok Opname</span></NuxtLink>
             <NuxtLink to="/packaging" class="nav-item" title="Packaging"><i class="bi bi-box2"></i> <span class="nav-text">Packaging</span></NuxtLink>
+            <NuxtLink to="/packaging-stock" class="nav-item" title="Stok Packaging"><i class="bi bi-box-seam"></i> <span class="nav-text">Stok Packaging</span></NuxtLink>
           </div>
           <div v-else class="sidebar-items-mini">
             <NuxtLink to="/sop-checklist" class="nav-item" title="SOP Checklist"><i class="bi bi-clipboard-check"></i></NuxtLink>
             <NuxtLink to="/quality-check" class="nav-item" title="Quality Check"><i class="bi bi-shield-check"></i></NuxtLink>
             <NuxtLink to="/stok-opname" class="nav-item" title="Stok Opname"><i class="bi bi-clipboard-data"></i></NuxtLink>
             <NuxtLink to="/packaging" class="nav-item" title="Packaging"><i class="bi bi-box2"></i></NuxtLink>
+            <NuxtLink to="/packaging-stock" class="nav-item" title="Stok Packaging"><i class="bi bi-box-seam"></i></NuxtLink>
           </div>
         </div>
 
@@ -49,10 +51,12 @@
           <div v-if="!minimized" class="sidebar-items" :class="{ collapsed: !isOpen('ops') }">
             <NuxtLink to="/shift" class="nav-item" title="Shift"><i class="bi bi-clock-history"></i> <span class="nav-text">Shift</span></NuxtLink>
             <NuxtLink to="/members" class="nav-item" title="Member"><i class="bi bi-people"></i> <span class="nav-text">Member</span></NuxtLink>
+            <NuxtLink to="/activity" class="nav-item" title="Kegiatan"><i class="bi bi-journal-check"></i> <span class="nav-text">Kegiatan</span></NuxtLink>
           </div>
           <div v-else class="sidebar-items-mini">
             <NuxtLink to="/shift" class="nav-item" title="Shift"><i class="bi bi-clock-history"></i></NuxtLink>
             <NuxtLink to="/members" class="nav-item" title="Member"><i class="bi bi-people"></i></NuxtLink>
+            <NuxtLink to="/activity" class="nav-item" title="Kegiatan"><i class="bi bi-journal-check"></i></NuxtLink>
           </div>
         </div>
 
@@ -76,10 +80,12 @@
           </div>
           <div v-if="!minimized" class="sidebar-items" :class="{ collapsed: !isOpen('keu-staff') }">
             <NuxtLink to="/staff-recap" class="nav-item" title="Rekap Hari Ini"><i class="bi bi-calendar-check"></i> <span class="nav-text">Rekap Hari Ini</span></NuxtLink>
+            <NuxtLink to="/cash-ledger" class="nav-item" title="Buku Kas Harian"><i class="bi bi-journal-bookmark"></i> <span class="nav-text">Buku Kas Harian</span></NuxtLink>
             <NuxtLink to="/staff-expenses" class="nav-item" title="Pengeluaran"><i class="bi bi-cash-stack"></i> <span class="nav-text">Pengeluaran</span></NuxtLink>
           </div>
           <div v-else class="sidebar-items-mini">
             <NuxtLink to="/staff-recap" class="nav-item" title="Rekap Hari Ini"><i class="bi bi-calendar-check"></i></NuxtLink>
+            <NuxtLink to="/cash-ledger" class="nav-item" title="Buku Kas Harian"><i class="bi bi-journal-bookmark"></i></NuxtLink>
             <NuxtLink to="/staff-expenses" class="nav-item" title="Pengeluaran"><i class="bi bi-cash-stack"></i></NuxtLink>
           </div>
         </div>
@@ -138,7 +144,9 @@
           </div>
           <div v-if="!minimized" class="sidebar-items" :class="{ collapsed: !isOpen('keu') }">
             <NuxtLink to="/admin/finance" class="nav-item" title="Buku Kas"><i class="bi bi-journal-text"></i> <span class="nav-text">Buku Kas</span></NuxtLink>
+            <NuxtLink to="/cash-ledger" class="nav-item" title="Buku Kas Harian"><i class="bi bi-journal-bookmark"></i> <span class="nav-text">Buku Kas Harian</span></NuxtLink>
             <NuxtLink to="/admin/stocks" class="nav-item" title="Stok Masuk"><i class="bi bi-box-seam"></i> <span class="nav-text">Stok Masuk</span></NuxtLink>
+            <NuxtLink to="/admin/packaging-stock" class="nav-item" title="Stok Packaging"><i class="bi bi-boxes"></i> <span class="nav-text">Stok Packaging</span></NuxtLink>
             <NuxtLink to="/admin/topping-stock" class="nav-item" title="Stok Topping"><i class="bi bi-pie-chart"></i> <span class="nav-text">Stok Topping</span></NuxtLink>
             <NuxtLink to="/admin/expenses" class="nav-item" title="Pengeluaran"><i class="bi bi-wallet2"></i> <span class="nav-text">Pengeluaran</span></NuxtLink>
             <NuxtLink to="/admin/daily-recap" class="nav-item" title="Rekap Harian"><i class="bi bi-calendar-check"></i> <span class="nav-text">Rekap Harian</span></NuxtLink>
@@ -147,7 +155,9 @@
           </div>
           <div v-else class="sidebar-items-mini">
             <NuxtLink to="/admin/finance" class="nav-item" title="Buku Kas"><i class="bi bi-journal-text"></i></NuxtLink>
+            <NuxtLink to="/cash-ledger" class="nav-item" title="Buku Kas Harian"><i class="bi bi-journal-bookmark"></i></NuxtLink>
             <NuxtLink to="/admin/stocks" class="nav-item" title="Stok Masuk"><i class="bi bi-box-seam"></i></NuxtLink>
+            <NuxtLink to="/admin/packaging-stock" class="nav-item" title="Stok Packaging"><i class="bi bi-boxes"></i></NuxtLink>
             <NuxtLink to="/admin/topping-stock" class="nav-item" title="Stok Topping"><i class="bi bi-pie-chart"></i></NuxtLink>
             <NuxtLink to="/admin/expenses" class="nav-item" title="Pengeluaran"><i class="bi bi-wallet2"></i></NuxtLink>
             <NuxtLink to="/admin/daily-recap" class="nav-item" title="Rekap Harian"><i class="bi bi-calendar-check"></i></NuxtLink>
@@ -169,6 +179,7 @@
             <NuxtLink to="/admin/attendance" class="nav-item" title="Absensi Staff"><i class="bi bi-person-check"></i> <span class="nav-text">Absensi Staff</span></NuxtLink>
             <NuxtLink to="/admin/shifts" class="nav-item" title="Shift Staff"><i class="bi bi-clock-history"></i> <span class="nav-text">Shift Staff</span></NuxtLink>
             <NuxtLink to="/admin/packaging" class="nav-item" title="Packaging Staff"><i class="bi bi-box2"></i> <span class="nav-text">Packaging Staff</span></NuxtLink>
+            <NuxtLink to="/admin/activity" class="nav-item" title="Kegiatan Staff"><i class="bi bi-journal-check"></i> <span class="nav-text">Kegiatan Staff</span></NuxtLink>
           </div>
           <div v-else class="sidebar-items-mini">
             <NuxtLink to="/admin/sop-monitor" class="nav-item" title="SOP Staff"><i class="bi bi-clipboard-check"></i></NuxtLink>
@@ -178,6 +189,7 @@
             <NuxtLink to="/admin/attendance" class="nav-item" title="Absensi Staff"><i class="bi bi-person-check"></i></NuxtLink>
             <NuxtLink to="/admin/shifts" class="nav-item" title="Shift Staff"><i class="bi bi-clock-history"></i></NuxtLink>
             <NuxtLink to="/admin/packaging" class="nav-item" title="Packaging Staff"><i class="bi bi-box2"></i></NuxtLink>
+            <NuxtLink to="/admin/activity" class="nav-item" title="Kegiatan Staff"><i class="bi bi-journal-check"></i></NuxtLink>
           </div>
         </div>
       </template>

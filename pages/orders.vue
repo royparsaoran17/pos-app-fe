@@ -173,7 +173,7 @@
           </div>
           <div class="modal-body">
             <div class="row g-3 mb-3">
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <label class="form-label fz-13 fw-600">Metode Pembayaran</label>
                 <select v-model="editForm.payment_method" class="form-select form-select-sm">
                   <option value="CASH">Cash</option>
@@ -182,7 +182,12 @@
                   <option value="GOJEK">Gojek</option>
                 </select>
               </div>
-              <div class="col-md-6">
+              <div class="col-md-4">
+                <label class="form-label fz-13 fw-600">Tanggal Pesanan</label>
+                <input v-model="editForm.created_at" type="datetime-local" class="form-control form-control-sm" />
+                <small class="text-muted fz-11">Hanya superadmin (WIB)</small>
+              </div>
+              <div class="col-md-4">
                 <label class="form-label fz-13 fw-600">Catatan</label>
                 <input v-model="editForm.notes" class="form-control form-control-sm" />
               </div>
@@ -316,7 +321,7 @@
 
 <script setup>
 import { useMainStore } from '~/stores'
-import { formatRupiah, formatDate, todayJakarta } from '~/utils/format'
+import { formatRupiah, formatDate, todayJakarta, toJakartaDatetimeLocal, jakartaDatetimeLocalToISO } from '~/utils/format'
 import { useToast } from '~/composables/useToast'
 
 definePageMeta({ layout: 'dashboard', middleware: 'auth' })
@@ -336,7 +341,7 @@ const dateTo = ref(todayJakarta())
 const selectedOrder = ref(null)
 const printingOrder = ref(null)
 const editingOrder = ref(null)
-const editForm = ref({ payment_method: '', notes: '', items: [] })
+const editForm = ref({ payment_method: '', notes: '', created_at: '', items: [] })
 const savingEdit = ref(false)
 const deletingOrder = ref(null)
 const deleting = ref(false)
@@ -452,6 +457,7 @@ const openEdit = async (order) => {
   editForm.value = {
     payment_method: order.payment_method,
     notes: order.notes || '',
+    created_at: toJakartaDatetimeLocal(order.created_at),
     items: order.order_items.map(item => ({
       size: item.menu_size_key,
       spicy_level: item.spicy_level,
@@ -500,7 +506,11 @@ const doDelete = async () => {
 const saveEdit = async () => {
   savingEdit.value = true
   try {
-    await store.updateOrder(editingOrder.value.id, editForm.value)
+    const payload = {
+      ...editForm.value,
+      created_at: jakartaDatetimeLocalToISO(editForm.value.created_at),
+    }
+    await store.updateOrder(editingOrder.value.id, payload)
     editingOrder.value = null
     fetchData()
   } catch (e) {

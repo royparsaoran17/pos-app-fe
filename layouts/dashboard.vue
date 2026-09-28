@@ -66,9 +66,12 @@ const pageTitle = computed(() => {
     '/stok-opname': 'Stok Opname',
     '/staff-expenses': 'Pengeluaran',
     '/staff-recap': 'Rekap Hari Ini',
+    '/cash-ledger': 'Buku Kas Harian',
     '/shift': 'Shift',
     '/members': 'Member',
     '/packaging': 'Packaging',
+    '/packaging-stock': 'Stok Packaging',
+    '/activity': 'Kegiatan',
     '/photobooth': 'Photobooth',
     '/admin/toppings': 'Kelola Topping',
     '/admin/bumbu': 'Kelola Bumbu',
@@ -92,6 +95,8 @@ const pageTitle = computed(() => {
     '/admin/attendance': 'Absensi Staff',
     '/admin/shifts': 'Shift Staff',
     '/admin/packaging': 'Packaging Staff',
+    '/admin/packaging-stock': 'Stok Packaging',
+    '/admin/activity': 'Kegiatan Staff',
     '/admin/stores': 'Kelola Toko',
   }
   return titles[route.path] || 'OMT'

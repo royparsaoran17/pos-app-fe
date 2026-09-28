@@ -91,6 +91,10 @@ export const useMainStore = defineStore('main', {
     async fetchAttendance(params) { return (await http.get('/dashboard/attendance', { params })).data },
     async fetchDailyRecap(params) { return (await http.get('/dashboard/daily-recap', { params })).data },
     async fetchStaffRecap(params) { return (await http.get('/dashboard/staff-recap', { params })).data },
+
+    // Cash Ledger
+    async fetchCashLedger(params) { return (await http.get('/cash-ledger', { params })).data },
+    async setCashLedgerReconciliation(payload) { return (await http.post('/cash-ledger/reconcile', payload)).data },
     async fetchToppingStock(params) { return (await http.get('/dashboard/topping-stock', { params })).data },
     async fetchAnalytics(params) { return (await http.get('/dashboard/analytics', { params })).data },
 
@@ -212,6 +216,20 @@ export const useMainStore = defineStore('main', {
     async fetchPackagingSummary() { return (await http.get('/stock-packaging/summary-today')).data },
     async fetchPackagingAdmin(params) { return (await http.get('/stock-packaging/admin', { params })).data },
     async deletePackaging(id) { return (await http.delete(`/stock-packaging/${id}`)).data },
+
+    // Stock Packaging Ledger (masuk/keluar/saldo)
+    async fetchPackagingLedger(params) { return (await http.get('/packaging-stock/ledger', { params })).data },
+    async fetchPackagingStocks(params) { return (await http.get('/packaging-stock', { params })).data },
+    async createPackagingStock(payload) { return (await http.post('/packaging-stock', payload)).data },
+    async deletePackagingStock(id) { return (await http.delete(`/packaging-stock/${id}`)).data },
+    async setPackagingReconcile(payload) { return (await http.post('/packaging-stock/reconcile', payload)).data },
+
+    // Activities (Input Kegiatan)
+    async fetchActivities(params) { return (await http.get('/activities', { params })).data },
+    async fetchActivitiesAdmin(params) { return (await http.get('/activities/admin', { params })).data },
+    async createActivity(payload) { return (await http.post('/activities', payload)).data },
+    async updateActivity(id, payload) { return (await http.put(`/activities/${id}`, payload)).data },
+    async deleteActivity(id) { return (await http.delete(`/activities/${id}`)).data },
 
     // Photobooth
     async uploadPhotoStrip(payload) { return (await http.post('/photobooth/upload', payload)).data },
